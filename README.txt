@@ -1,0 +1,4 @@
+This app seamlessly integrates a range of smart devices from Philips, bringing enhanced convenience and automation to your daily life. By connecting these devices to Homey, you can control, monitor, and personalize your smart home experience effortlessly.
+Whether it's lighting, ambiance, or other smart functionalities, this integration ensures that your Philips devices work together harmoniously, empowering you to create a smarter and more efficient living space.
+
+This app currently supports integration with a single Philips device, offering seamless control and automation. Future updates will expand support to include a variety of Philips products, such as televisions, smart lamps, and other innovative devices that are not yet available or fully functional in the Homey App Store. Stay tuned for exciting developments!

@@ -1,0 +1,29 @@
+{
+  "id": "com.philips.smart-devices",
+  "version": "1.0.0",
+  "compatibility": ">=12.2.0",
+  "platforms": ["local"],
+  "sdk": 3,
+  "brandColor": "#0074E0",
+  "name": { "en": "Philips Smart Devices" },
+  "description": { "en": "Add your Philips smart devices to the Homey ecosystem" },
+  "category": "lights",
+  "tags": { "en": ["philips", "somneo", "smartsleep"] },
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "permissions": [],
+  "author": { "name": "Vladyslav Zahorodnii" },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "my_paypal_username"
+      }
+    }
+  },
+  "bugs": { "url": "https://github.com/homeyapps/philips-smart-devices/issues" },
+  "homeyCommunityTopicId": 122893,
+  "source": "https://github.com/homeyapps/philips-smart-devices"
+}

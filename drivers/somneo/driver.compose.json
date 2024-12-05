@@ -1,0 +1,70 @@
+{
+  "name": {
+    "en": "Somneo Sleep & Wake-up Light"
+  },
+  "class": "socket",
+  "capabilities": [
+    "measure_temperature",
+    "measure_humidity",
+    "measure_luminance",
+    "measure_noise",
+    "onoff.mainlight",
+    "onoff.nightlight",
+    "onoff.sunset",
+    "onoff.relax_breathe",
+    "dim"
+  ],
+  "capabilitiesOptions": {
+    "onoff.mainlight": {
+      "title": {
+        "en": "Main Light"
+      }
+    },
+    "onoff.nightlight": {
+      "title": {
+        "en": "Night Light"
+      }
+    },
+    "onoff.sunset": {
+      "title": {
+        "en": "Sunset"
+      }
+    },
+    "onoff.relax_breathe": {
+      "title": {
+        "en": "Relax Breathe"
+      }
+    },
+    "dim": {
+      "min": 1,
+      "max": 25,
+      "step": 1,
+      "units": { "en": "" }
+    }
+  },
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "discovery": "somneo-devices",
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_somneo_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_somneo_devices"
+      }
+    },
+    {
+      "id": "add_somneo_devices",
+      "template": "add_devices"
+    }
+  ]
+}

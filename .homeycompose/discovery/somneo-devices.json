@@ -1,0 +1,19 @@
+{
+  "type": "mdns-sd",
+  "mdns-sd": {
+    "name": "philipscondor",
+    "protocol": "tcp"
+  },
+  "id": "{{txt.id}}",
+  "conditions": [
+    [
+      {
+        "field": "txt.fn",
+        "match": {
+          "type": "string",
+          "value": "Philips SmartAlarm"
+        }
+      }
+    ]
+  ]
+}

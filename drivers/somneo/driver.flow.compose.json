@@ -1,0 +1,232 @@
+{
+  "triggers": [
+    {
+      "id": "onoff.mainlight_true",
+      "title": { "en": "Main light is on" },
+      "hint": {
+        "en": "The status of the main light from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.mainlight",
+          "type": "boolean",
+          "title": { "en": "main-light" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.mainlight_false",
+      "title": { "en": "Main light is off" },
+      "hint": {
+        "en": "The status of the main light from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.mainlight",
+          "type": "boolean",
+          "title": { "en": "main-light" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.nightlight_true",
+      "title": { "en": "Night light is on" },
+      "hint": {
+        "en": "The status of the night light from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.nightlight",
+          "type": "boolean",
+          "title": { "en": "night-light" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.nightlight_false",
+      "title": { "en": "Night light is off" },
+      "hint": {
+        "en": "The status of the night light from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.nightlight",
+          "type": "boolean",
+          "title": { "en": "night-light" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.sunset_true",
+      "title": { "en": "Sunset is on" },
+      "hint": {
+        "en": "The status of the sunset from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.sunset",
+          "type": "boolean",
+          "title": { "en": "sunset" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.sunset_false",
+      "title": { "en": "Sunset is off" },
+      "hint": {
+        "en": "The status of the sunset from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.sunset",
+          "type": "boolean",
+          "title": { "en": "sunset" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.relax_breathe_true",
+      "title": { "en": "Relax breathe is on" },
+      "hint": {
+        "en": "The status of the relax breathe from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.relax_breathe",
+          "type": "boolean",
+          "title": { "en": "relax-breathe" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.relax_breathe_false",
+      "title": { "en": "Relax breathe is off" },
+      "hint": {
+        "en": "The status of the relax breathe from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.relax_breathe",
+          "type": "boolean",
+          "title": { "en": "relax-breathe" }
+        }
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "onoff.mainlight_enabled",
+      "title": {
+        "en": "Main light is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the main light from device is updated every 4 seconds."
+      }
+    },
+    {
+      "id": "onoff.nightlight_enabled",
+      "title": {
+        "en": "Night light is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the night light from device is updated every 4 seconds."
+      }
+    },
+    {
+      "id": "onoff.sunset_enabled",
+      "title": {
+        "en": "Sunset is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the sunset from device is updated every 4 seconds."
+      }
+    },
+    {
+      "id": "onoff.relax_breathe_enabled",
+      "title": {
+        "en": "Relax breathe is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the relax breathe from device is updated every 4 seconds."
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "onoff.mainlight_activate",
+      "title": {
+        "en": "... the main light"
+      },
+      "titleFormatted": {
+        "en": "[[state]] the main light"
+      },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "values": [
+            { "id": "true", "label": { "en": "Activate" } },
+            { "id": "false", "label": { "en": "Deactivate" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "onoff.nightlight_activate",
+      "title": {
+        "en": "... the night light"
+      },
+      "titleFormatted": {
+        "en": "[[state]] the night light"
+      },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "values": [
+            { "id": "true", "label": { "en": "Activate" } },
+            { "id": "false", "label": { "en": "Deactivate" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "onoff.sunset_activate",
+      "title": {
+        "en": "... the sunset"
+      },
+      "titleFormatted": {
+        "en": "[[state]] the sunset"
+      },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "values": [
+            { "id": "true", "label": { "en": "Activate" } },
+            { "id": "false", "label": { "en": "Deactivate" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "onoff.relax_breathe_activate",
+      "title": {
+        "en": "... the relax breathe"
+      },
+      "titleFormatted": {
+        "en": "[[state]] the relax breathe"
+      },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "values": [
+            { "id": "true", "label": { "en": "Activate" } },
+            { "id": "false", "label": { "en": "Deactivate" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

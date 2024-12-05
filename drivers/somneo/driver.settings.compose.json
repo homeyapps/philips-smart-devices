@@ -1,0 +1,228 @@
+[
+  {
+    "type": "group",
+    "label": { "en": "Device" },
+    "children": [
+      {
+        "id": "display_always_on",
+        "type": "checkbox",
+        "value": true,
+        "label": { "en": "Display Always On" },
+        "hint": { "en": "When deactivated, the display will automatically turn off after a certain amount of time." }
+      },
+      {
+        "id": "display_brightness",
+        "type": "number",
+        "label": { "en": "Display Brightness" },
+        "uiComponent": "slider",
+        "value": 3,
+        "min": 1,
+        "max": 6,
+        "step": 1
+      },
+      {
+        "id": "sensors_polling_frequency",
+        "type": "number",
+        "label": { "en": "Sensors Polling Frequency" },
+        "value": 60,
+        "min": 1,
+        "max": 86400,
+        "step": 10,
+        "units": { "en": "sec" },
+        "hint": { "en": "This setting adjusts the frequency of the alarm clock's sensors polling." }
+      },
+      {
+        "id": "alarms_polling_frequency",
+        "type": "number",
+        "label": { "en": "Alarms Polling Frequency" },
+        "value": 30,
+        "min": 1,
+        "max": 1440,
+        "step": 1,
+        "units": { "en": "min" },
+        "hint": { "en": "This setting adjusts the frequency of the alarm clock's alarms polling." }
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": { "en": "Sunset" },
+    "children": [
+      {
+        "id": "sunset_duration",
+        "type": "number",
+        "label": { "en": "Duration" },
+        "value": 30,
+        "min": 5,
+        "max": 60,
+        "step": 5,
+        "units": { "en": "min" }
+      },
+      {
+        "id": "sunset_light_intensity",
+        "type": "number",
+        "label": { "en": "Light Intensity" },
+        "value": 20,
+        "min": 0,
+        "max": 25,
+        "step": 1
+      },
+      {
+        "id": "sunset_color_scheme",
+        "type": "dropdown",
+        "value": "0",
+        "label": { "en": "Color Scheme" },
+        "hint": { "en": "Choose a color scheme to create your own personal sunset." },
+        "values": [
+          {
+            "id": "0",
+            "label": { "en": "Sunny Day" }
+          },
+          {
+            "id": "1",
+            "label": { "en": "Island Red" }
+          },
+          {
+            "id": "2",
+            "label": { "en": "Nordic White" }
+          },
+          {
+            "id": "3",
+            "label": { "en": "Caribbean Red" }
+          }
+        ]
+      },
+      {
+        "id": "sunset_ambient_sound",
+        "type": "dropdown",
+        "value": "1",
+        "label": { "en": "Ambient Sounds" },
+        "values": [
+          {
+            "id": "0",
+            "label": { "en": "No Sound" }
+          },
+          {
+            "id": "fm",
+            "label": { "en": "FM Radio" }
+          },
+          {
+            "id": "1",
+            "label": { "en": "Soft Rain" }
+          },
+          {
+            "id": "2",
+            "label": { "en": "Ocean Waves" }
+          },
+          {
+            "id": "3",
+            "label": { "en": "Under Water" }
+          },
+          {
+            "id": "4",
+            "label": { "en": "Summer Lake" }
+          }
+        ]
+      },
+      {
+        "id": "sunset_ambient_radio_channel",
+        "type": "dropdown",
+        "value": "1",
+        "label": { "en": "Radio Channel" },
+        "hint": { "en": "The setting is applied only when ambient sound is selected as 'FM Radio'." },
+        "values": [
+          {
+            "id": "1",
+            "label": { "en": "Channel 1" }
+          },
+          {
+            "id": "2",
+            "label": { "en": "Channel 2" }
+          },
+          {
+            "id": "3",
+            "label": { "en": "Channel 3" }
+          },
+          {
+            "id": "4",
+            "label": { "en": "Channel 4" }
+          },
+          {
+            "id": "5",
+            "label": { "en": "Channel 5" }
+          }
+        ]
+      },
+      {
+        "id": "sunset_ambient_volume",
+        "type": "number",
+        "label": { "en": "Ambient Sound Volume" },
+        "value": 12,
+        "min": 1,
+        "max": 25,
+        "step": 1
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": { "en": "Relax Breathe" },
+    "hint": { "en": "Light-guided wind-down function is designed to help you sleep by decompressing from the day's activities \nFollow one of seven rhythms of light or sound with your breathing as instructed in the video. \nRecommend to start with a rhythm of 6-8 breaths per minute. \nn the unlikely case of feeling unwell while performing RelaxBreathe please stop RelaxBreathe immediately." },
+    "children": [
+      {
+        "id": "relax_breathing_pace",
+        "type": "number",
+        "label": { "en": "Breathing Pace" },
+        "value": 4,
+        "min": 4,
+        "max": 10,
+        "step": 1,
+        "units": { "en": "bpm" }
+      },
+      {
+        "id": "relax_duration",
+        "type": "number",
+        "label": { "en": "Duration" },
+        "value": 10,
+        "min": 5,
+        "max": 15,
+        "step": 5,
+        "units": { "en": "min" }
+      },
+      {
+        "id": "relax_guidance_type",
+        "type": "dropdown",
+        "value": "0",
+        "label": { "en": "Guidance Type" },
+        "values": [
+          {
+            "id": "0",
+            "label": { "en": "Light" }
+          },
+          {
+            "id": "1",
+            "label": { "en": "Sound" }
+          }
+        ]
+      },
+      {
+        "id": "relax_light_intensity",
+        "type": "number",
+        "label": { "en": "Light Intensity" },
+        "value": 20,
+        "min": 1,
+        "max": 25,
+        "step": 1
+      },
+      {
+        "id": "relax_sound_intensity",
+        "type": "number",
+        "label": { "en": "Sound Intensity" },
+        "value": 12,
+        "min": 1,
+        "max": 25,
+        "step": 1
+      }
+    ]
+  }
+]
