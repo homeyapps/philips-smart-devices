@@ -1,46 +1,107 @@
 'use strict';
 
-import axios, { AxiosInstance } from 'axios';
 import https from 'https';
-import { retryAsync } from 'ts-retry';
-import {
-  SomneoAlarm, SomneoAlarms, SomneoAlarmTimes, SomneoEditAlarm, SomneoStatuses,
-} from './domains';
+import { ApiClient } from './ApiClient';
 import LocalLogger from '../core/LocalLogger';
+import {
+  Alarm, SomneoAlarm,
+  SomneoAlarms,
+  SomneoAlarmSchedules,
+  SomneoBedtimeTrackingSettings,
+  SomneoLightSettings,
+  SomneoRelaxBreatheSettings,
+  SomneoSensorsData,
+  SomneoStatusesData,
+  SomneoSunsetSettings,
+} from './Domains';
 
-export default class PhilipsSomneoClient {
+export default class PhilipsSomneoClient extends ApiClient {
 
-  private axiosInstance: AxiosInstance;
-
-  constructor(public host: string, private log: LocalLogger) {
-    this.axiosInstance = axios.create({
-      baseURL: `https://${host}/di/v1/products/1`,
-      httpsAgent: new https.Agent({
-        secureProtocol: 'TLSv1_2_method',
-        keepAlive: true,
-        rejectUnauthorized: false,
-      }),
-      headers: {
-        Accept: '*/*',
-        'Content-Type': 'application/json',
+  constructor(host: string, log: LocalLogger) {
+    super(
+      {
+        baseURL: `https://${host}/di/v1/products/1`,
+        log,
+        httpsAgent: new https.Agent({
+          secureProtocol: 'TLSv1_2_method',
+          rejectUnauthorized: false,
+          keepAlive: true,
+        }),
       },
+    );
+  }
+
+  public getSensors(): Promise<SomneoSensorsData> {
+    return this.get<SomneoSensorsData>('/wusrd');
+  }
+
+  public getStatuses() : Promise<SomneoStatusesData> {
+    return this.get<SomneoStatusesData>('/wusts');
+  }
+
+  public getLightSettings(): Promise<SomneoLightSettings> {
+    return this.get<SomneoLightSettings>('/wulgt');
+  }
+
+  public getSunsetSettings(): Promise<SomneoSunsetSettings> {
+    return this.get<SomneoSunsetSettings>('/wudsk');
+  }
+
+  public getRelaxBreatheSettings(): Promise<SomneoRelaxBreatheSettings> {
+    return this.get<SomneoRelaxBreatheSettings>('/wurlx');
+  }
+
+  public getBedtimeTracking(): Promise<SomneoBedtimeTrackingSettings> {
+    return this.get<SomneoBedtimeTrackingSettings>('/wungt');
+  }
+
+  public changeDisplaySettings(aod: boolean, brightness: number): Promise<SomneoStatusesData> {
+    return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { dspon: aod, brght: brightness });
+  }
+
+  public restartDevice(): Promise<SomneoStatusesData> {
+    return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { pwrsz: true });
+  }
+
+  public toggleMainLight(enabled: boolean): Promise<SomneoLightSettings> {
+    return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { onoff: enabled, tempy: false, ngtlt: false });
+  }
+
+  public toggleNightLight(enabled: boolean): Promise<SomneoLightSettings> {
+    return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { onoff: false, tempy: false, ngtlt: enabled });
+  }
+
+  public changeMainLightBrightness(brightness: number): Promise<SomneoLightSettings> {
+    return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { ltlvl: brightness });
+  }
+
+  public toggleSunrisePreview(enabled: boolean, colorScheme: number): Promise<SomneoLightSettings> {
+    return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', {
+      onoff: enabled, tempy: true, ctype: colorScheme, ngtlt: false,
     });
   }
 
-  async getStatuses() : Promise<SomneoStatuses> {
-    return this.getData<SomneoStatuses>('/wusts', 'SomneoStatuses');
+  public toggleSunset(sunset: SomneoSunsetSettings): Promise<SomneoSunsetSettings> {
+    return this.put<SomneoSunsetSettings, SomneoSunsetSettings>('/wudsk', sunset);
   }
 
-  async updateStatuses(statuses: SomneoStatuses) : Promise<void> {
-    return this.putData('/wusts', 'SomneoStatuses', {
-      dspon: statuses.dspon,
-      brght: statuses.brght,
+  public toggleRelaxBreathe(relaxBreathe: SomneoRelaxBreatheSettings): Promise<SomneoRelaxBreatheSettings> {
+    return this.put<SomneoRelaxBreatheSettings, SomneoRelaxBreatheSettings>('/wurlx', {
+      durat: relaxBreathe.durat,
+      onoff: relaxBreathe.onoff,
+      progr: relaxBreathe.progr,
+      rtype: relaxBreathe.rtype,
+      ...(relaxBreathe.rtype === 0 ? { intny: relaxBreathe.intny } : { sndlv: relaxBreathe.sndlv }),
     });
   }
 
-  async getAlarms(): Promise<SomneoAlarm[]> {
-    const alarms = await this.getData<SomneoAlarms>('/wualm/aenvs', 'SomneoAlarms');
-    const times = await this.getData<SomneoAlarmTimes>('/wualm/aalms', 'SomneoAlarmTimes');
+  public toggleBedtimeTracking(enabled: boolean): Promise<SomneoBedtimeTrackingSettings> {
+    return this.put<unknown, SomneoBedtimeTrackingSettings>('/wungt', { night: enabled });
+  }
+
+  public async getAlarms(): Promise<Alarm[]> {
+    const alarms = await this.get<SomneoAlarms>('/wualm/aenvs');
+    const times = await this.get<SomneoAlarmSchedules>('/wualm/aalms');
 
     return alarms.prfen.map((enabled, index) => ({
       id: index + 1,
@@ -50,29 +111,8 @@ export default class PhilipsSomneoClient {
     })).filter((_, index) => alarms.prfvs[index]);
   }
 
-  async toggleAlarm(id: number, enabled: boolean): Promise<SomneoEditAlarm> {
-    return this.putData('/wualm/prfwu', 'SomneoEditAlarm', {
-      prfnr: id,
-      prfen: enabled,
-    });
-  }
-
-  private async getData<T>(uri: string, type: string): Promise<T> {
-    return retryAsync(() => this.axiosInstance.get(uri)
-      .then((response) => response.data as T), { delay: 500, maxTry: 5 })
-      .then((data) => {
-        this.log.debug(`HTTPS GET -> type=${type} host=${this.host} data=${JSON.stringify(data)}`);
-        return data;
-      });
-  }
-
-  private async putData<T, R>(uri: string, type: string, data: T) : Promise<R> {
-    return retryAsync(() => this.axiosInstance.put(uri, data)
-      .then((response) => response.data as R), { delay: 500, maxTry: 5 })
-      .then((response) => {
-        this.log.debug(`HTTPS PUT -> type=${type} host=${this.host} request-data=${JSON.stringify(data)} response-data=${JSON.stringify(response)}`);
-        return response;
-      });
+  public toggleAlarm(enabled: boolean, id: number): Promise<SomneoAlarm> {
+    return this.put<unknown, SomneoAlarm>('/wualm/prfwu', { prfnr: id, prfvs: enabled });
   }
 
 }

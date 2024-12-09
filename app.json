@@ -244,6 +244,56 @@
             "filter": "driver_id=somneo"
           }
         ]
+      },
+      {
+        "id": "onoff.bedtime_tracking_true",
+        "title": {
+          "en": "Bedtime tracking is on"
+        },
+        "hint": {
+          "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+        },
+        "tokens": [
+          {
+            "name": "onoff.bedtime_tracking",
+            "type": "boolean",
+            "title": {
+              "en": "bedtime-tracking"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.bedtime_tracking_false",
+        "title": {
+          "en": "Bedtime tracking is off"
+        },
+        "hint": {
+          "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+        },
+        "tokens": [
+          {
+            "name": "onoff.bedtime_tracking",
+            "type": "boolean",
+            "title": {
+              "en": "bedtime-tracking"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
       }
     ],
     "conditions": [
@@ -302,6 +352,22 @@
         },
         "hint": {
           "en": "The status of the relax breathe from device is updated every 4 seconds."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.bedtime_tracking_enabled",
+        "title": {
+          "en": "Bedtime tracking is !{{on|off}}"
+        },
+        "hint": {
+          "en": "The status of the bedtime tracking from device is updated every 4 seconds."
         },
         "args": [
           {
@@ -448,6 +514,40 @@
             ]
           }
         ]
+      },
+      {
+        "id": "onoff.bedtime_tracking_activate",
+        "title": {
+          "en": "... the bedtime tracking"
+        },
+        "titleFormatted": {
+          "en": "[[state]] the bedtime tracking"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          },
+          {
+            "name": "state",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "true",
+                "label": {
+                  "en": "Activate"
+                }
+              },
+              {
+                "id": "false",
+                "label": {
+                  "en": "Deactivate"
+                }
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -466,7 +566,9 @@
         "onoff.nightlight",
         "onoff.sunset",
         "onoff.relax_breathe",
-        "dim"
+        "onoff.bedtime_tracking",
+        "dim",
+        "button.restart"
       ],
       "capabilitiesOptions": {
         "onoff.mainlight": {
@@ -489,12 +591,26 @@
             "en": "Relax Breathe"
           }
         },
+        "onoff.bedtime_tracking": {
+          "title": {
+            "en": "Bedtime Tracking"
+          }
+        },
         "dim": {
           "min": 1,
           "max": 25,
           "step": 1,
           "units": {
             "en": ""
+          }
+        },
+        "button.restart": {
+          "maintenanceAction": true,
+          "title": {
+            "en": "Restart device"
+          },
+          "desc": {
+            "en": "If the device controller is not responding, restart the device may resolve the issue. After this action, please restart the application for best results."
           }
         }
       },
@@ -548,7 +664,6 @@
               "label": {
                 "en": "Display Brightness"
               },
-              "uiComponent": "slider",
               "value": 3,
               "min": 1,
               "max": 6,
@@ -568,7 +683,7 @@
                 "en": "sec"
               },
               "hint": {
-                "en": "This setting adjusts the frequency of the alarm clock's sensors polling."
+                "en": "This setting adjusts the frequency of the sensors polling."
               }
             },
             {
@@ -585,8 +700,64 @@
                 "en": "min"
               },
               "hint": {
-                "en": "This setting adjusts the frequency of the alarm clock's alarms polling."
+                "en": "This setting adjusts the frequency of the alarms polling."
               }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Sunrise"
+          },
+          "children": [
+            {
+              "id": "sunrise_preview",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Enable sunrise preview mode"
+              },
+              "hint": {
+                "en": "Activates the preview mode for sunrise and how it will look in alarm. Remember to turn this mode off when you finish testing."
+              }
+            },
+            {
+              "id": "sunrise_color_scheme",
+              "type": "dropdown",
+              "value": "0",
+              "label": {
+                "en": "Color Scheme"
+              },
+              "hint": {
+                "en": "Choose a color scheme to create your own personal sunrise."
+              },
+              "values": [
+                {
+                  "id": "0",
+                  "label": {
+                    "en": "Sunny Day"
+                  }
+                },
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "Island Red"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Nordic White"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Caribbean Red"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -667,15 +838,21 @@
               },
               "values": [
                 {
-                  "id": "0",
+                  "id": "off",
                   "label": {
                     "en": "No Sound"
                   }
                 },
                 {
-                  "id": "fm",
+                  "id": "fmr",
                   "label": {
                     "en": "FM Radio"
+                  }
+                },
+                {
+                  "id": "aux",
+                  "label": {
+                    "en": "AUX Source"
                   }
                 },
                 {

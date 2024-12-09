@@ -1,15 +1,12 @@
 'use strict';
 
 import Homey, { DiscoveryResultMDNSSD } from 'homey';
-import { SomneoService } from 'homebridge-somneo/dist/lib/somneoService';
-import { SomneoConstants } from 'homebridge-somneo/dist/lib/somneoConstants';
 import LocalLogger from '../../src/core/LocalLogger';
 import PhilipsSomneoClient from '../../src/api/PhilipsSomneoClient';
 
 module.exports = class SomneoDevice extends Homey.Device {
 
-  private somneoClient?: SomneoService;
-  private somneoClientExtended?: PhilipsSomneoClient;
+  private somneoClient?: PhilipsSomneoClient;
   private localLogger: LocalLogger = new LocalLogger(this);
 
   private sensorsUpdateInterval?: NodeJS.Timeout;
@@ -17,37 +14,31 @@ module.exports = class SomneoDevice extends Homey.Device {
   private functionsUpdateInterval?: NodeJS.Timeout;
 
   async onAdded() {
-    this.log('SomneoDevice has been added');
+    this.log('Somneo device has been added');
   }
 
   async onInit() {
-    this.sensorsUpdateInterval = this.homey.setInterval(async () => this.updateSensors(), this.getSetting('sensors_polling_frequency') * 1000);
-    this.alarmsUpdateInterval = this.homey.setInterval(async () => this.updateAlarms(), this.getSetting('alarms_polling_frequency') * 60 * 1000);
+    this.sensorsUpdateInterval = this.homey.setInterval(this.syncSensors.bind(this), this.getSetting('sensors_polling_frequency') * 1000);
+    this.alarmsUpdateInterval = this.homey.setInterval(this.syncAlarms.bind(this), this.getSetting('alarms_polling_frequency') * 60 * 1000);
 
-    await this.updateSensors();
-    await this.updateAlarms();
-    await this.registerFunctionsListeners();
+    await this.syncSensors();
+    await this.syncAlarms();
+    await this.registerActionsListeners();
     await this.registerAlarmsListeners();
-    await this.updateDeviceFunctions();
+    await this.syncDeviceActions();
 
     await this.registerRunListeners();
 
-    this.functionsUpdateInterval = this.homey.setInterval(async () => this.updateDeviceFunctions(), 4000);
-    this.log('SomneoDevice has been initialized');
+    this.functionsUpdateInterval = this.homey.setInterval(this.syncDeviceActions.bind(this), 4000);
+    this.log('Somneo device has been initialized');
   }
 
   async onDiscoveryAvailable(discoveryResult: DiscoveryResultMDNSSD) {
-    this.somneoClient = new SomneoService(discoveryResult.address, this.localLogger);
-    this.somneoClientExtended = new PhilipsSomneoClient(discoveryResult.address, this.localLogger);
+    this.somneoClient = new PhilipsSomneoClient(discoveryResult.address, this.localLogger);
 
-    Object.defineProperty(SomneoConstants, 'BRIGHTNESS_STEP_INTERVAL', {
-      value: 1,
-      writable: true,
-    });
-
-    await this.updateSensors();
-    await this.updateAlarms();
-    await this.updateDeviceFunctions();
+    await this.syncSensors();
+    await this.syncAlarms();
+    await this.syncDeviceActions();
   }
 
   async onDiscoveryAddressChanged(discoveryResult: DiscoveryResultMDNSSD) {
@@ -68,216 +59,257 @@ module.exports = class SomneoDevice extends Homey.Device {
     changedKeys: string[];
   }): Promise<string | void> {
     if (changedKeys.includes('display_always_on') || changedKeys.includes('display_brightness')) {
-      if (this.somneoClientExtended !== undefined) {
-        await this.somneoClientExtended.updateStatuses({
-          dspon: Boolean(newSettings.display_always_on),
-          brght: Number(newSettings.display_brightness),
-        }).catch(this.error);
-      }
-    }
-
-    if (changedKeys.includes('sunset_ambient_sound') && newSettings['sunset_ambient_sound'] === 'fm') {
-      Object.defineProperty(SomneoConstants, 'SOUND_SOURCE_SUNSET_PROGRAM', {
-        value: 'fmr',
-        writable: true,
-      });
-    } else if (changedKeys.includes('sunset_ambient_sound')) {
-      Object.defineProperty(SomneoConstants, 'SOUND_SOURCE_SUNSET_PROGRAM', {
-        value: 'dus',
-        writable: true,
-      });
+      await this.somneoClient?.changeDisplaySettings(
+        Boolean(newSettings.display_always_on),
+        Number(newSettings.display_brightness),
+      ).catch(this.error);
     }
 
     if (changedKeys.includes('sensors_polling_frequency')) {
       this.homey.clearInterval(this.sensorsUpdateInterval);
-      this.sensorsUpdateInterval = this.homey.setInterval(async () => this.updateSensors(), this.getSetting('sensors_polling_frequency') * 1000);
+      this.sensorsUpdateInterval = this.homey.setInterval(this.syncSensors.bind(this), this.getSetting('sensors_polling_frequency') * 1000);
     }
     if (changedKeys.includes('alarms_polling_frequency')) {
       this.homey.clearInterval(this.alarmsUpdateInterval);
-      this.alarmsUpdateInterval = this.homey.setInterval(async () => this.updateAlarms(), this.getSetting('alarms_polling_frequency') * 60 * 1000);
+      this.alarmsUpdateInterval = this.homey.setInterval(this.syncAlarms.bind(this), this.getSetting('alarms_polling_frequency') * 60 * 1000);
     }
 
-    this.log('SomneoDevice settings where changed');
+    if (changedKeys.includes('sunrise_preview')) {
+      await this.somneoClient?.toggleSunrisePreview(
+        Boolean(newSettings.sunrise_preview),
+        Number(newSettings.sunrise_color_scheme),
+      ).catch(this.error);
+    } else if (changedKeys.includes('sunrise_color_scheme') && Boolean(this.getSettings().sunrise_preview)) {
+      await this.somneoClient?.toggleSunrisePreview(false, 0).catch(this.error);
+      this.homey.setTimeout(() => {
+        this.somneoClient?.toggleSunrisePreview(true, Number(newSettings.sunrise_color_scheme)).catch(this.error);
+      }, 5000);
+    }
+
+    this.log('Somneo device settings where changed');
   }
 
   async onDeleted() {
     this.homey.clearInterval(this.sensorsUpdateInterval);
     this.homey.clearInterval(this.alarmsUpdateInterval);
     this.homey.clearInterval(this.functionsUpdateInterval);
-    this.log('SomneoDevice has been deleted');
+    this.log('Somneo device has been deleted');
   }
 
-  private async updateSensors() {
-    if (this.somneoClient !== undefined && this.somneoClientExtended !== undefined) {
+  private async syncSensors() {
+    if (this.somneoClient !== undefined) {
       if (!this.getAvailable()) {
-        await this.setAvailable();
+        await this.setAvailable().catch(this.error);
       }
 
-      await this.somneoClient.getSensorReadings().then((sensorReadings) => {
-        this.setCapabilityValue('measure_temperature', sensorReadings.mstmp).catch(this.error);
-        this.setCapabilityValue('measure_humidity', sensorReadings.msrhu).catch(this.error);
-        this.setCapabilityValue('measure_luminance', sensorReadings.mslux).catch(this.error);
-        // @ts-ignore mssnd not exists in client
-        this.setCapabilityValue('measure_noise', sensorReadings.mssnd).catch(this.error);
-      }).catch(this.error);
+      try {
+        const sensorsData = await this.somneoClient.getSensors();
 
-      this.log('Sensors Updated');
+        await this.setCapabilityValue('measure_temperature', sensorsData.mstmp).catch(this.error);
+        await this.setCapabilityValue('measure_humidity', sensorsData.msrhu).catch(this.error);
+        await this.setCapabilityValue('measure_luminance', sensorsData.mslux).catch(this.error);
+        await this.setCapabilityValue('measure_noise', sensorsData.mssnd).catch(this.error);
+
+        this.log('Sensors updated');
+      } catch (err) {
+        this.error(err);
+      }
     } else {
-      await this.setUnavailable('Device not responding, please restart the application.');
+      await this.setUnavailable('Device not responding, please restart the application or device.').catch(this.error);
     }
   }
 
-  private async updateAlarms() {
-    await this.somneoClientExtended?.getAlarms().then((alarms) => {
-      let capabilityID: string;
-      const capabilities = this.getCapabilities();
+  private async syncAlarms() {
+    try {
+      const alarms = await this.somneoClient?.getAlarms();
 
-      capabilities.filter((capabilityID) => /^button\.\d+$/.test(capabilityID))
-        .filter((capabilityID) => !alarms.map((alarm) => alarm.id).includes(Number(capabilityID.split('.')[1])))
-        .forEach((capabilityID) => {
-          this.removeCapability(capabilityID).catch(this.error);
-        });
+      if (!alarms) {
+        this.log('No alarms returned');
+        return;
+      }
 
-      alarms.forEach((alarm) => {
-        capabilityID = `button.${alarm.id}`;
+      const alarmsIDs = alarms.map((alarm) => alarm.id);
+      const capabilitiesToRemove = this.getCapabilities().filter((capabilityID) => /^button\.\d+$/.test(capabilityID)).filter((capabilityID) => {
+        return !alarmsIDs.includes(Number(capabilityID.split('.')[1]));
+      });
+
+      for (const capabilityID of capabilitiesToRemove) {
+        await this.removeCapability(capabilityID).catch(this.error);
+      }
+
+      for (const alarm of alarms) {
+        const capabilityID = `button.${alarm.id}`;
 
         if (!this.hasCapability(capabilityID)) {
-          this.addCapability(capabilityID).catch(this.error);
-          this.registerAlarmsListeners(capabilityID).catch(this.error);
+          try {
+            await this.addCapability(capabilityID).catch(this.error);
+            await this.registerAlarmsListeners(capabilityID);
+          } catch (error) {
+            this.error(`Error adding capability or registering listeners for ${capabilityID}: `, error);
+          }
         }
 
-        this.setCapabilityValue(capabilityID, alarm.enabled).catch(this.error);
-        this.setCapabilityOptions(capabilityID, { title: alarm.time }).catch(this.error);
-      });
+        await this.setCapabilityOptions(capabilityID, { title: alarm.time }).catch(this.error);
+        await this.setCapabilityValue(capabilityID, alarm.enabled).catch(this.error);
+      }
 
-      this.log('Alarms Updated');
-    }).catch(this.error);
-  }
-
-  private async updateDeviceFunctions() {
-    if (this.somneoClient !== undefined) {
-      await this.somneoClient.getLightSettings().then((lightSettings) => {
-        if (!this.getAvailable()) {
-          this.setAvailable().catch(this.error);
-        }
-
-        this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
-        this.setCapabilityValue('dim', lightSettings.ltlvl).catch(this.error);
-        this.setCapabilityValue('onoff.nightlight', lightSettings.ngtlt).catch(this.error);
-      }).catch((error) => {
-        this.error(error);
-        this.setUnavailable('Something is wrong with the device controller, please disconnect for 30 seconds and reconnect the power to the device and wait 30 seconds again.').catch(this.error);
-      });
-
-      await this.somneoClient.getSunsetProgram().then((sunsetProgramSettings) => {
-        this.setCapabilityValue('onoff.sunset', sunsetProgramSettings.onoff).catch(this.error);
-      }).catch(this.error);
-
-      await this.somneoClient.getRelaxBreatheProgramSettings().then((relaxBreatheProgramSettings) => {
-        this.setCapabilityValue('onoff.relax_breathe', relaxBreatheProgramSettings.onoff).catch(this.error);
-      }).catch(this.error);
-
-      this.log('Functions Updated');
+      this.log('Alarms updated');
+    } catch (error) {
+      this.error('Error syncing alarms: ', error);
     }
   }
 
-  private async registerFunctionsListeners() {
+  private async syncDeviceActions() {
+    if (this.somneoClient !== undefined) {
+      try {
+        if (!this.getAvailable()) {
+          await this.setAvailable().catch(this.error);
+        }
+
+        const lightSettings = await this.somneoClient.getLightSettings();
+
+        await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
+        await this.setCapabilityValue('dim', lightSettings.ltlvl).catch(this.error);
+        await this.setCapabilityValue('onoff.nightlight', lightSettings.ngtlt).catch(this.error);
+      } catch (error) {
+        this.error('Error syncing device actions: ', error);
+        await this.setUnavailable('Something is wrong with the device controller, please use maintenance action.').catch(this.error);
+      }
+
+      await this.somneoClient.getSunsetSettings().then(async (sunsetSettings) => {
+        await this.setCapabilityValue('onoff.sunset', sunsetSettings.onoff).catch(this.error);
+      }).catch(this.error);
+
+      await this.somneoClient.getRelaxBreatheSettings().then(async (relaxBreatheSettings) => {
+        await this.setCapabilityValue('onoff.relax_breathe', relaxBreatheSettings.onoff).catch(this.error);
+      }).catch(this.error);
+
+      await this.somneoClient.getBedtimeTracking().then(async (bedtimeTrackingSettings) => {
+        await this.setCapabilityValue('onoff.bedtime_tracking', bedtimeTrackingSettings.night).catch(this.error);
+      }).catch(this.error);
+
+      this.log('Device actions updated');
+    }
+  }
+
+  private async registerActionsListeners() {
     this.registerMultipleCapabilityListener(['onoff.mainlight', 'dim'], async ({ 'onoff.mainlight': onoff, dim }) => {
       if (this.somneoClient !== undefined) {
         if (dim > 0 && onoff === false) {
-          await this.somneoClient.turnOffMainLight().catch(this.error);
-          await this.setCapabilityValue('onoff.mainlight', false);
+          await this.somneoClient.toggleMainLight(false).then(async (lightSettings) => {
+            await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
+          }).catch(this.error);
         } else if (dim <= 0 && onoff === true) {
-          await this.somneoClient.turnOnMainLight().catch(this.error);
-          await this.setCapabilityValue('onoff.mainlight', true);
+          await this.somneoClient.toggleMainLight(true).then(async (lightSettings) => {
+            await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
+          }).catch(this.error);
         } else if (dim > 0) {
-          await this.somneoClient.turnOnMainLight().catch(this.error);
-          await this.setCapabilityValue('onoff.mainlight', true);
-          await this.somneoClient.updateMainLightBrightness(dim).catch(this.error);
+          await this.somneoClient.toggleMainLight(true).then(async (lightSettings) => {
+            await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
+          }).catch(this.error);
+          await this.somneoClient.changeMainLightBrightness(dim).then(async (lightSettings) => {
+            await this.setCapabilityValue('dim', lightSettings.ltlvl).catch(this.error);
+          }).catch(this.error);
         } else if (onoff === true) {
-          await this.somneoClient.turnOnMainLight().catch(this.error);
-          await this.setCapabilityValue('onoff.mainlight', true);
+          await this.somneoClient.toggleMainLight(true).then(async (lightSettings) => {
+            await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
+          }).catch(this.error);
         } else {
-          await this.somneoClient.turnOffMainLight().catch(this.error);
-          await this.setCapabilityValue('onoff.mainlight', false);
+          await this.somneoClient.toggleMainLight(false).then(async (lightSettings) => {
+            await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
+          }).catch(this.error);
         }
       }
     });
 
     this.registerCapabilityListener('onoff.nightlight', async (value) => {
       if (this.somneoClient !== undefined) {
-        if (value) {
-          await this.somneoClient.turnOnNightLight().catch(this.error);
-          await this.setCapabilityValue('onoff.nightlight', true);
-        } else {
-          await this.somneoClient.turnOffNightLight().catch(this.error);
-          await this.setCapabilityValue('onoff.nightlight', false);
-        }
+        await this.somneoClient.toggleNightLight(value).then(async (lightSettings) => {
+          await this.setCapabilityValue('onoff.nightlight', lightSettings.ngtlt).catch(this.error);
+        }).catch(this.error);
       }
     });
+
     this.registerCapabilityListener('onoff.sunset', async (value) => {
       if (this.somneoClient !== undefined) {
-        if (value) {
-          const settings = await this.getSettings();
-          let ambientSound = settings.sunset_ambient_sound;
+        const settings = await this.getSettings();
 
-          if (settings.sunset_ambient_sound === 'fm') {
-            ambientSound = settings.sunset_ambient_radio_channel;
+        let ambientSoundType = 'dus';
+        let ambientSoundChannel = settings.sunset_ambient_sound;
+
+        if (Number.isNaN(Number(ambientSoundChannel))) {
+          ambientSoundType = settings.sunset_ambient_sound;
+          if (ambientSoundType === 'fmr') {
+            ambientSoundChannel = settings.sunset_ambient_radio_channel;
           }
-
-          await this.somneoClient.turnOnSunsetProgram({
-            Duration: settings.sunset_duration,
-            LightIntensity: settings.sunset_light_intensity,
-            ColorScheme: settings.sunset_color_scheme,
-            AmbientSounds: ambientSound,
-            Volume: settings.sunset_ambient_volume,
-          }).catch(this.error);
-          await this.setCapabilityValue('onoff.sunset', true);
-        } else {
-          await this.somneoClient.turnOffSunsetProgram().catch(this.error);
-          await this.setCapabilityValue('onoff.sunset', false);
         }
+
+        await this.somneoClient.toggleSunset({
+          durat: settings.sunset_duration,
+          onoff: value,
+          curve: settings.sunset_light_intensity,
+          ctype: settings.sunset_color_scheme,
+          snddv: ambientSoundType,
+          sndch: ambientSoundChannel,
+          sndlv: settings.sunset_ambient_volume,
+        }).then(async (sunsetSettings) => {
+          await this.setCapabilityValue('onoff.sunset', sunsetSettings.onoff).catch(this.error);
+        }).catch(this.error);
       }
     });
+
     this.registerCapabilityListener('onoff.relax_breathe', async (value) => {
       if (this.somneoClient !== undefined) {
-        if (value) {
-          const settings = await this.getSettings();
+        const settings = await this.getSettings();
 
-          await this.somneoClient.turnOnRelaxBreatheProgram({
-            BreathsPerMin: settings.relax_breathing_pace,
-            Duration: settings.relax_duration,
-            GuidanceType: settings.relax_guidance_type,
-            LightIntensity: settings.relax_light_intensity,
-            Volume: settings.relax_sound_intensity,
-          }).catch(this.error);
-          await this.setCapabilityValue('onoff.relax_breathe', true);
-        } else {
-          await this.somneoClient.turnOffRelaxBreatheProgram().catch(this.error);
-          await this.setCapabilityValue('onoff.relax_breathe', false);
-        }
+        await this.somneoClient.toggleRelaxBreathe({
+          durat: settings.relax_duration,
+          onoff: value,
+          progr: settings.relax_breathing_pace - 3,
+          rtype: settings.relax_guidance_type,
+          intny: settings.relax_light_intensity,
+          sndlv: settings.relax_sound_intensity,
+        }).then(async (relaxBreatheSettings) => {
+          await this.setCapabilityValue('onoff.relax_breathe', relaxBreatheSettings.onoff).catch(this.error);
+        }).catch(this.error);
       }
+    });
+
+    this.registerCapabilityListener('onoff.bedtime_tracking', async (value) => {
+      if (this.somneoClient !== undefined) {
+        await this.somneoClient.toggleBedtimeTracking(value).then(async (bedtimeTrackingSettings) => {
+          await this.setCapabilityValue('onoff.bedtime_tracking', bedtimeTrackingSettings.night).catch(this.error);
+        }).catch(this.error);
+      }
+    });
+
+    this.registerCapabilityListener('button.restart', async () => {
+      await this.somneoClient?.restartDevice().catch(this.error);
     });
   }
 
   private async registerAlarmsListeners(capabilityID: string | undefined = undefined) {
     if (capabilityID !== undefined) {
-      this.registerAlarmListener(capabilityID);
+      await this.registerAlarmListener(capabilityID);
     } else {
-      this.getCapabilities().filter((capabilityID) => /^button\.\d+$/.test(capabilityID)).forEach((capabilityID) => {
-        this.registerAlarmListener(capabilityID);
-      });
+      for (const capability of this.getCapabilities().filter((capabilityID) => /^button\.\d+$/.test(capabilityID))) {
+        await this.registerAlarmListener(capability);
+      }
     }
   }
 
-  private registerAlarmListener(capabilityID: string) {
+  private async registerAlarmListener(capabilityID: string) {
     this.registerCapabilityListener(capabilityID, async (value) => {
-      await this.somneoClientExtended?.toggleAlarm(Number(capabilityID.split('.')[1]), value).then((response) => {
-        this.setCapabilityValue(capabilityID, response.prfen).catch(this.error);
-        this.setCapabilityOptions(capabilityID, {
-          title: `${response.almhr.toString().padStart(2, '0')}:${response.almmn.toString().padStart(2, '0')}`,
+      try {
+        this.log(`Toggle alarm with status: ${value}`);
+        const response = await this.somneoClient?.toggleAlarm(value, Number(capabilityID.split('.')[1]));
+        await this.setCapabilityOptions(capabilityID, {
+          title: `${response?.almhr.toString().padStart(2, '0')}:${response?.almmn.toString().padStart(2, '0')}`,
         }).catch(this.error);
-      }).catch(this.error);
+        await this.setCapabilityValue(capabilityID, response?.prfen).catch(this.error);
+      } catch (error) {
+        this.error('Error toggling alarm: ', error);
+      }
     });
   }
 
@@ -294,6 +326,9 @@ module.exports = class SomneoDevice extends Homey.Device {
     this.homey.flow.getConditionCard('onoff.relax_breathe_enabled').registerRunListener(async (args, state) => {
       return this.getCapabilityValue('onoff.relax_breathe');
     });
+    this.homey.flow.getConditionCard('onoff.bedtime_tracking_enabled').registerRunListener(async (args, state) => {
+      return this.getCapabilityValue('onoff.bedtime_tracking');
+    });
 
     this.homey.flow.getActionCard('onoff.mainlight_activate').registerRunListener(async (args, state) => {
       await this.triggerCapabilityListener('onoff.mainlight', state).catch(this.error);
@@ -306,6 +341,9 @@ module.exports = class SomneoDevice extends Homey.Device {
     });
     this.homey.flow.getActionCard('onoff.relax_breathe_activate').registerRunListener(async (args, state) => {
       await this.triggerCapabilityListener('onoff.relax_breathe', state).catch(this.error);
+    });
+    this.homey.flow.getActionCard('onoff.bedtime_tracking_activate').registerRunListener(async (args, state) => {
+      await this.triggerCapabilityListener('onoff.bedtime_tracking', state).catch(this.error);
     });
   }
 

@@ -12,7 +12,9 @@
     "onoff.nightlight",
     "onoff.sunset",
     "onoff.relax_breathe",
-    "dim"
+    "onoff.bedtime_tracking",
+    "dim",
+    "button.restart"
   ],
   "capabilitiesOptions": {
     "onoff.mainlight": {
@@ -35,11 +37,21 @@
         "en": "Relax Breathe"
       }
     },
+    "onoff.bedtime_tracking": {
+      "title": {
+        "en": "Bedtime Tracking"
+      }
+    },
     "dim": {
       "min": 1,
       "max": 25,
       "step": 1,
       "units": { "en": "" }
+    },
+    "button.restart": {
+      "maintenanceAction": true,
+      "title": { "en": "Restart device" },
+      "desc": { "en": "If the device controller is not responding, restart the device may resolve the issue. After this action, please restart the application for best results." }
     }
   },
   "platforms": [

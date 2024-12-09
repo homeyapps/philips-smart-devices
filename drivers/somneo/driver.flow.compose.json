@@ -111,6 +111,34 @@
           "title": { "en": "relax-breathe" }
         }
       ]
+    },
+    {
+      "id": "onoff.bedtime_tracking_true",
+      "title": { "en": "Bedtime tracking is on" },
+      "hint": {
+        "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.bedtime_tracking",
+          "type": "boolean",
+          "title": { "en": "bedtime-tracking" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.bedtime_tracking_false",
+      "title": { "en": "Bedtime tracking is off" },
+      "hint": {
+        "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+      },
+      "tokens": [
+        {
+          "name": "onoff.bedtime_tracking",
+          "type": "boolean",
+          "title": { "en": "bedtime-tracking" }
+        }
+      ]
     }
   ],
   "conditions": [
@@ -148,6 +176,15 @@
       },
       "hint": {
         "en": "The status of the relax breathe from device is updated every 4 seconds."
+      }
+    },
+    {
+      "id": "onoff.bedtime_tracking_enabled",
+      "title": {
+        "en": "Bedtime tracking is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the bedtime tracking from device is updated every 4 seconds."
       }
     }
   ],
@@ -216,6 +253,25 @@
       },
       "titleFormatted": {
         "en": "[[state]] the relax breathe"
+      },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "values": [
+            { "id": "true", "label": { "en": "Activate" } },
+            { "id": "false", "label": { "en": "Deactivate" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "onoff.bedtime_tracking_activate",
+      "title": {
+        "en": "... the bedtime tracking"
+      },
+      "titleFormatted": {
+        "en": "[[state]] the bedtime tracking"
       },
       "args": [
         {

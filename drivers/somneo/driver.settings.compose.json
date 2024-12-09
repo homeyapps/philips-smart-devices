@@ -14,7 +14,6 @@
         "id": "display_brightness",
         "type": "number",
         "label": { "en": "Display Brightness" },
-        "uiComponent": "slider",
         "value": 3,
         "min": 1,
         "max": 6,
@@ -29,7 +28,7 @@
         "max": 86400,
         "step": 10,
         "units": { "en": "sec" },
-        "hint": { "en": "This setting adjusts the frequency of the alarm clock's sensors polling." }
+        "hint": { "en": "This setting adjusts the frequency of the sensors polling." }
       },
       {
         "id": "alarms_polling_frequency",
@@ -40,7 +39,45 @@
         "max": 1440,
         "step": 1,
         "units": { "en": "min" },
-        "hint": { "en": "This setting adjusts the frequency of the alarm clock's alarms polling." }
+        "hint": { "en": "This setting adjusts the frequency of the alarms polling." }
+      }
+    ]
+  },
+  {
+    "type": "group",
+    "label": { "en": "Sunrise" },
+    "children": [
+      {
+        "id": "sunrise_preview",
+        "type": "checkbox",
+        "value": false,
+        "label": { "en": "Enable sunrise preview mode" },
+        "hint": { "en": "Activates the preview mode for sunrise and how it will look in alarm. Remember to turn this mode off when you finish testing." }
+      },
+      {
+        "id": "sunrise_color_scheme",
+        "type": "dropdown",
+        "value": "0",
+        "label": { "en": "Color Scheme" },
+        "hint": { "en": "Choose a color scheme to create your own personal sunrise." },
+        "values": [
+          {
+            "id": "0",
+            "label": { "en": "Sunny Day" }
+          },
+          {
+            "id": "1",
+            "label": { "en": "Island Red" }
+          },
+          {
+            "id": "2",
+            "label": { "en": "Nordic White" }
+          },
+          {
+            "id": "3",
+            "label": { "en": "Caribbean Red" }
+          }
+        ]
       }
     ]
   },
@@ -99,12 +136,16 @@
         "label": { "en": "Ambient Sounds" },
         "values": [
           {
-            "id": "0",
+            "id": "off",
             "label": { "en": "No Sound" }
           },
           {
-            "id": "fm",
+            "id": "fmr",
             "label": { "en": "FM Radio" }
+          },
+          {
+            "id": "aux",
+            "label": { "en": "AUX Source" }
           },
           {
             "id": "1",
