@@ -1,6 +1,6 @@
 {
   "id": "com.philips.smart-devices",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "compatibility": ">=12.2.0",
   "platforms": [
     "local"
@@ -26,7 +26,9 @@
     "large": "/assets/images/large.png",
     "xlarge": "/assets/images/xlarge.png"
   },
-  "permissions": ["homey:manager:api"],
+  "permissions": [
+    "homey:manager:api"
+  ],
   "author": {
     "name": "Vladyslav Zahorodnii"
   },

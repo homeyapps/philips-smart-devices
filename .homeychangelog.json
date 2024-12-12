@@ -4,5 +4,8 @@
   },
   "1.1.0": {
     "en": "Added new features: Bedtime tracking, Sunrise preview"
+  },
+  "1.2.0": {
+    "en": "Added new features: Device alarms sync with Homey application"
   }
 }
