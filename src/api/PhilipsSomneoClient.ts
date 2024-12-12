@@ -4,7 +4,7 @@ import https from 'https';
 import { ApiClient } from './ApiClient';
 import LocalLogger from '../core/LocalLogger';
 import {
-  Alarm, SomneoAlarm,
+  HomeyAlarm, SomneoAlarm,
   SomneoAlarms,
   SomneoAlarmSchedules,
   SomneoBedtimeTrackingSettings,
@@ -16,6 +16,20 @@ import {
 } from './Domains';
 
 export default class PhilipsSomneoClient extends ApiClient {
+
+  private readonly alarmDays: Record<number, string[]> = {
+    0: ['tomorrow'],
+    2: ['monday'],
+    4: ['tuesday'],
+    8: ['wednesday'],
+    16: ['thursday'],
+    32: ['friday'],
+    64: ['saturday'],
+    128: ['sunday'],
+    62: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+    192: ['saturday', 'sunday'],
+    254: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+  };
 
   constructor(host: string, log: LocalLogger) {
     super(
@@ -63,7 +77,16 @@ export default class PhilipsSomneoClient extends ApiClient {
     return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { pwrsz: true });
   }
 
-  public toggleMainLight(enabled: boolean): Promise<SomneoLightSettings> {
+  public toggleMainLight(enabled: boolean, brightness?: number): Promise<SomneoLightSettings> {
+    if (brightness !== undefined) {
+      return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', {
+        onoff: enabled,
+        tempy: false,
+        ngtlt: false,
+        ltlvl: brightness,
+      });
+    }
+
     return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { onoff: enabled, tempy: false, ngtlt: false });
   }
 
@@ -99,7 +122,7 @@ export default class PhilipsSomneoClient extends ApiClient {
     return this.put<unknown, SomneoBedtimeTrackingSettings>('/wungt', { night: enabled });
   }
 
-  public async getAlarms(): Promise<Alarm[]> {
+  public async getAlarms(): Promise<HomeyAlarm[]> {
     const alarms = await this.get<SomneoAlarms>('/wualm/aenvs');
     const times = await this.get<SomneoAlarmSchedules>('/wualm/aalms');
 
@@ -108,11 +131,22 @@ export default class PhilipsSomneoClient extends ApiClient {
       enabled,
       powerWakeEnabled: alarms.pwrsv[index] === 1,
       time: `${times.almhr[index].toString().padStart(2, '0')}:${times.almmn[index].toString().padStart(2, '0')}`,
+      repetition: this.daysIntToAlarmDays(times.daynm[index]),
     })).filter((_, index) => alarms.prfvs[index]);
   }
 
   public toggleAlarm(enabled: boolean, id: number): Promise<SomneoAlarm> {
     return this.put<unknown, SomneoAlarm>('/wualm/prfwu', { prfnr: id, prfvs: enabled });
+  }
+
+  private daysIntToAlarmDays(daysInt: number): Record<string, boolean> {
+    const allDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const activeDays = this.alarmDays[daysInt] ?? [2, 4, 8, 16, 32, 64, 128].filter((bit) => (bit & daysInt) !== 0).flatMap((bit) => this.alarmDays[bit]);
+
+    return allDays.reduce((result, day) => {
+      result[day] = activeDays.includes(day);
+      return result;
+    }, {} as Record<string, boolean>);
   }
 
 }

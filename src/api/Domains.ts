@@ -62,11 +62,13 @@ export interface SomneoAlarms {
 export interface SomneoAlarmSchedules {
   almhr: number[]; // Alarms hours
   almmn: number[]; // Alarms minutes
+  daynm: number[]; // Alarms days
 }
 
-export interface Alarm {
+export interface HomeyAlarm {
   id: number;
   enabled: boolean;
   powerWakeEnabled: boolean;
   time: string;
+  repetition?: object;
 }

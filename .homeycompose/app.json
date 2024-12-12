@@ -26,7 +26,7 @@
     "large": "/assets/images/large.png",
     "xlarge": "/assets/images/xlarge.png"
   },
-  "permissions": [],
+  "permissions": ["homey:manager:api"],
   "author": {
     "name": "Vladyslav Zahorodnii"
   },

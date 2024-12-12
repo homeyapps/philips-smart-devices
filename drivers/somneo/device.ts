@@ -1,11 +1,15 @@
 'use strict';
 
 import Homey, { DiscoveryResultMDNSSD } from 'homey';
+import { HomeyAPI, HomeyAPIV2 } from 'homey-api';
 import LocalLogger from '../../src/core/LocalLogger';
 import PhilipsSomneoClient from '../../src/api/PhilipsSomneoClient';
+import { HomeyAPITypes } from '../../types';
+import Alarm = HomeyAPIV2.ManagerAlarms.Alarm;
 
 module.exports = class SomneoDevice extends Homey.Device {
 
+  private homeyClient?: HomeyAPITypes;
   private somneoClient?: PhilipsSomneoClient;
   private localLogger: LocalLogger = new LocalLogger(this);
 
@@ -34,6 +38,7 @@ module.exports = class SomneoDevice extends Homey.Device {
   }
 
   async onDiscoveryAvailable(discoveryResult: DiscoveryResultMDNSSD) {
+    this.homeyClient = await HomeyAPI.createAppAPI({ homey: this.homey });
     this.somneoClient = new PhilipsSomneoClient(discoveryResult.address, this.localLogger);
 
     await this.syncSensors();
@@ -74,6 +79,10 @@ module.exports = class SomneoDevice extends Homey.Device {
       this.alarmsUpdateInterval = this.homey.setInterval(this.syncAlarms.bind(this), this.getSetting('alarms_polling_frequency') * 60 * 1000);
     }
 
+    if (changedKeys.includes('alarms_device_sync') && newSettings.alarms_device_sync) {
+      await this.syncAlarms();
+    }
+
     if (changedKeys.includes('sunrise_preview')) {
       await this.somneoClient?.toggleSunrisePreview(
         Boolean(newSettings.sunrise_preview),
@@ -93,6 +102,8 @@ module.exports = class SomneoDevice extends Homey.Device {
     this.homey.clearInterval(this.sensorsUpdateInterval);
     this.homey.clearInterval(this.alarmsUpdateInterval);
     this.homey.clearInterval(this.functionsUpdateInterval);
+
+    await this.unsetStoreValue('alarmsIDs');
     this.log('Somneo device has been deleted');
   }
 
@@ -122,6 +133,9 @@ module.exports = class SomneoDevice extends Homey.Device {
   private async syncAlarms() {
     try {
       const alarms = await this.somneoClient?.getAlarms();
+      const homeyAlarmsIDs: Map<number, string> = new Map(
+        Object.entries(this.getStoreValue('alarmsIDs') || {}).map(([key, value]) => [Number(key), value as string]),
+      );
 
       if (!alarms) {
         this.log('No alarms returned');
@@ -135,6 +149,11 @@ module.exports = class SomneoDevice extends Homey.Device {
 
       for (const capabilityID of capabilitiesToRemove) {
         await this.removeCapability(capabilityID).catch(this.error);
+
+        const alarmID = Number(capabilityID.split('.')[1]);
+        if (!homeyAlarmsIDs.has(alarmID)) {
+          await this.homeyClient?.alarms.deleteAlarm({ id: `${homeyAlarmsIDs.get(alarmID)}` }).then(() => homeyAlarmsIDs.delete(alarmID));
+        }
       }
 
       for (const alarm of alarms) {
@@ -147,6 +166,39 @@ module.exports = class SomneoDevice extends Homey.Device {
           } catch (error) {
             this.error(`Error adding capability or registering listeners for ${capabilityID}: `, error);
           }
+        }
+
+        if (this.getSettings().alarms_device_sync) {
+          if (!homeyAlarmsIDs.has(alarm.id)) {
+            const alarmName = `${this.getSettings().alarms_generative_name} #${alarm.id}`;
+            await this.homeyClient?.alarms.createAlarm({
+              alarm: {
+                name: alarmName,
+                time: alarm.time,
+                enabled: alarm.enabled,
+                repetition: alarm.repetition,
+              },
+            }).then((homeyAlarm) => {
+              homeyAlarmsIDs.set(alarm.id, (<Alarm> homeyAlarm).id);
+              this.homey.notifications.createNotification({ excerpt: `Alarm **${alarmName}** was created` }).catch(this.error);
+            });
+          } else {
+            try {
+              await this.homeyClient?.alarms.updateAlarm({
+                id: `${homeyAlarmsIDs.get(alarm.id)}`,
+                alarm: {
+                  time: alarm.time,
+                  enabled: alarm.enabled,
+                  repetition: alarm.repetition,
+                },
+              });
+            } catch (error) {
+              this.log(`Alarm #${alarm.id} was deleted in Homey application`, error);
+              homeyAlarmsIDs.delete(alarm.id);
+            }
+          }
+
+          await this.setStoreValue('alarmsIDs', Object.fromEntries(homeyAlarmsIDs)).catch(this.error);
         }
 
         await this.setCapabilityOptions(capabilityID, { title: alarm.time }).catch(this.error);
@@ -204,11 +256,8 @@ module.exports = class SomneoDevice extends Homey.Device {
             await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
           }).catch(this.error);
         } else if (dim > 0) {
-          await this.somneoClient.toggleMainLight(true).then(async (lightSettings) => {
+          await this.somneoClient.toggleMainLight(true, dim).then(async (lightSettings) => {
             await this.setCapabilityValue('onoff.mainlight', lightSettings.onoff).catch(this.error);
-          }).catch(this.error);
-          await this.somneoClient.changeMainLightBrightness(dim).then(async (lightSettings) => {
-            await this.setCapabilityValue('dim', lightSettings.ltlvl).catch(this.error);
           }).catch(this.error);
         } else if (onoff === true) {
           await this.somneoClient.toggleMainLight(true).then(async (lightSettings) => {

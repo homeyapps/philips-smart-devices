@@ -27,7 +27,9 @@
     "large": "/assets/images/large.png",
     "xlarge": "/assets/images/xlarge.png"
   },
-  "permissions": [],
+  "permissions": [
+    "homey:manager:api"
+  ],
   "author": {
     "name": "Vladyslav Zahorodnii"
   },
@@ -701,6 +703,37 @@
               },
               "hint": {
                 "en": "This setting adjusts the frequency of the alarms polling."
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Alarms"
+          },
+          "children": [
+            {
+              "id": "alarms_device_sync",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Synchronize Device Alarms"
+              },
+              "hint": {
+                "en": "If enabled, the alarms set in the Homey application will be created/updated from the device alarms. \n\nImportant: Your device's alarm polling frequency setting determines the update interval of alarms in the application."
+              },
+              "highlight": true
+            },
+            {
+              "id": "alarms_generative_name",
+              "type": "text",
+              "label": {
+                "en": "Alarm Name"
+              },
+              "value": "Philips Somneo",
+              "hint": {
+                "en": "The name of the alarm that will be used to generate alarms names in the Homey application when synchronizing the alarm clock itself and the application."
               }
             }
           ]
