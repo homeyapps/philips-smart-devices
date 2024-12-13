@@ -8,10 +8,10 @@
   "conditions": [
     [
       {
-        "field": "txt.fn",
+        "field": "txt.mr",
         "match": {
           "type": "string",
-          "value": "Philips SmartAlarm"
+          "value": "HF367"
         }
       }
     ]
