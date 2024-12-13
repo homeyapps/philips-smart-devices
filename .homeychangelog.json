@@ -7,5 +7,8 @@
   },
   "1.2.0": {
     "en": "Added new features: Device alarms sync with Homey application"
+  },
+  "1.2.1": {
+    "en": "Changed mDNS discovery field"
   }
 }
