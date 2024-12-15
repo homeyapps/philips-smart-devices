@@ -10,5 +10,8 @@
   },
   "1.2.1": {
     "en": "Changed mDNS discovery field"
+  },
+  "1.2.2": {
+    "en": "Changed discovery strategy to SSDP"
   }
 }
