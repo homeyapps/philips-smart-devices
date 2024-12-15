@@ -14,6 +14,7 @@ import {
   SomneoStatusesData,
   SomneoSunsetSettings,
 } from './Domains';
+import AxiosRateLimiter from '../core/AxiosRateLimiter';
 
 export default class PhilipsSomneoClient extends ApiClient {
 
@@ -36,8 +37,9 @@ export default class PhilipsSomneoClient extends ApiClient {
       {
         baseURL: `https://${host}/di/v1/products/1`,
         log,
+        rateLimiter: new AxiosRateLimiter(300),
+        headers: { Connection: 'keep-alive' },
         httpsAgent: new https.Agent({
-          secureProtocol: 'TLSv1_2_method',
           rejectUnauthorized: false,
           keepAlive: true,
         }),

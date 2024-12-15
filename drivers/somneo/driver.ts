@@ -13,7 +13,7 @@ module.exports = class SomneoDriver extends Homey.Driver {
 
     return Object.values(discoveryResults).map((discoveryResult) => {
       return {
-        name: 'Philips Somneo Sleep & Wake-up Light',
+        name: 'Philips Somneo',
         data: {
           id: discoveryResult.id,
         },

@@ -622,7 +622,7 @@
       "connectivity": [
         "lan"
       ],
-      "discovery": "somneo-devices",
+      "discovery": "somneo-ssdp",
       "images": {
         "small": "/drivers/somneo/assets/images/small.png",
         "large": "/drivers/somneo/assets/images/large.png",
@@ -1057,20 +1057,19 @@
     }
   ],
   "discovery": {
-    "somneo-devices": {
-      "type": "mdns-sd",
-      "mdns-sd": {
-        "name": "philipscondor",
-        "protocol": "tcp"
+    "somneo-ssdp": {
+      "type": "ssdp",
+      "ssdp": {
+        "search": "urn:philips-com:device:DiProduct:1"
       },
-      "id": "{{txt.id}}",
+      "id": "{{headers.usn}}",
       "conditions": [
         [
           {
-            "field": "txt.mr",
+            "field": "headers.st",
             "match": {
               "type": "string",
-              "value": "HF367"
+              "value": "philips-com:device:DiProduct:1"
             }
           }
         ]

@@ -104,6 +104,8 @@ module.exports = class SomneoDevice extends Homey.Device {
     this.homey.clearInterval(this.functionsUpdateInterval);
 
     await this.unsetStoreValue('alarmsIDs');
+    this.somneoClient?.cleanResources();
+
     this.log('Somneo device has been deleted');
   }
 
