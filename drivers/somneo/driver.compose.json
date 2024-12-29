@@ -14,7 +14,7 @@
     "onoff.relax_breathe",
     "onoff.bedtime_tracking",
     "dim",
-    "button.restart"
+    "button.reset"
   ],
   "capabilitiesOptions": {
     "onoff.mainlight": {
@@ -48,10 +48,10 @@
       "step": 1,
       "units": { "en": "" }
     },
-    "button.restart": {
+    "button.reset": {
       "maintenanceAction": true,
-      "title": { "en": "Restart device" },
-      "desc": { "en": "If the device controller is not responding, restart the device may resolve the issue. After this action, please restart the application for best results." }
+      "title": { "en": "Factory Reset" },
+      "desc": { "en":  "This option will completely reset your device to factory settings." }
     }
   },
   "platforms": [

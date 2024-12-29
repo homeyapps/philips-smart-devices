@@ -7,16 +7,28 @@ import {
   HomeyAlarm, SomneoAlarm,
   SomneoAlarms,
   SomneoAlarmSchedules,
-  SomneoBedtimeTrackingSettings,
+  SomneoBedtimeTrackingSettings, SomneoEvent,
   SomneoLightSettings,
   SomneoRelaxBreatheSettings,
   SomneoSensorsData,
   SomneoStatusesData,
   SomneoSunsetSettings,
-} from './Domains';
-import AxiosRateLimiter from '../core/AxiosRateLimiter';
+} from './SomneoDomains';
 
-export default class PhilipsSomneoClient extends ApiClient {
+export default class SomneoClient extends ApiClient {
+
+  public readonly events = {
+    mainLightOn: 'startlight',
+    mainLightOff: 'stoplight',
+    nightLightOn: 'nightlighton',
+    nightLightOff: 'nightlightoff',
+    sunsetOn: 'startdusk',
+    sunsetOff: 'enddusk',
+    relaxBreatheOn: 'startrelax',
+    relaxBreatheOff: 'endrelax',
+    bedtimeTrackingOn: 'go2bed',
+    bedtimeTrackingOff: 'endbed',
+  }
 
   private readonly alarmDays: Record<number, string[]> = {
     0: ['tomorrow'],
@@ -37,9 +49,9 @@ export default class PhilipsSomneoClient extends ApiClient {
       {
         baseURL: `https://${host}/di/v1/products/1`,
         log,
-        rateLimiter: new AxiosRateLimiter(300),
         headers: { Connection: 'keep-alive' },
         httpsAgent: new https.Agent({
+          maxSockets: 1,
           rejectUnauthorized: false,
           keepAlive: true,
         }),
@@ -75,8 +87,8 @@ export default class PhilipsSomneoClient extends ApiClient {
     return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { dspon: aod, brght: brightness });
   }
 
-  public restartDevice(): Promise<SomneoStatusesData> {
-    return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { pwrsz: true });
+  public resetDevice(): Promise<void> {
+    return this.put<unknown, void>('/fac', { reset: 1 });
   }
 
   public toggleMainLight(enabled: boolean, brightness?: number): Promise<SomneoLightSettings> {
@@ -92,17 +104,17 @@ export default class PhilipsSomneoClient extends ApiClient {
     return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { onoff: enabled, tempy: false, ngtlt: false });
   }
 
-  public toggleNightLight(enabled: boolean): Promise<SomneoLightSettings> {
-    return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { onoff: false, tempy: false, ngtlt: enabled });
-  }
-
   public changeMainLightBrightness(brightness: number): Promise<SomneoLightSettings> {
     return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { ltlvl: brightness });
   }
 
+  public toggleNightLight(enabled: boolean): Promise<SomneoLightSettings> {
+    return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', { onoff: false, tempy: false, ngtlt: enabled });
+  }
+
   public toggleSunrisePreview(enabled: boolean, colorScheme: number): Promise<SomneoLightSettings> {
     return this.put<SomneoLightSettings, SomneoLightSettings>('/wulgt', {
-      onoff: enabled, tempy: true, ctype: colorScheme, ngtlt: false,
+      onoff: enabled, tempy: enabled, ctype: colorScheme, ngtlt: false,
     });
   }
 
@@ -138,7 +150,11 @@ export default class PhilipsSomneoClient extends ApiClient {
   }
 
   public toggleAlarm(enabled: boolean, id: number): Promise<SomneoAlarm> {
-    return this.put<unknown, SomneoAlarm>('/wualm/prfwu', { prfnr: id, prfvs: enabled });
+    return this.put<unknown, SomneoAlarm>('/wualm/prfwu', { prfnr: id, prfen: enabled });
+  }
+
+  public getLastEvent(): Promise<SomneoEvent> {
+    return this.get<SomneoEvent>('/dataupload/event.1/data');
   }
 
   private daysIntToAlarmDays(daysInt: number): Record<string, boolean> {

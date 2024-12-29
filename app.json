@@ -53,7 +53,7 @@
           "en": "Main light is on"
         },
         "hint": {
-          "en": "The status of the main light from device is updated every 4 seconds."
+          "en": "The status of the main light from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -78,7 +78,7 @@
           "en": "Main light is off"
         },
         "hint": {
-          "en": "The status of the main light from device is updated every 4 seconds."
+          "en": "The status of the main light from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -103,7 +103,7 @@
           "en": "Night light is on"
         },
         "hint": {
-          "en": "The status of the night light from device is updated every 4 seconds."
+          "en": "The status of the night light from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -128,7 +128,7 @@
           "en": "Night light is off"
         },
         "hint": {
-          "en": "The status of the night light from device is updated every 4 seconds."
+          "en": "The status of the night light from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -153,7 +153,7 @@
           "en": "Sunset is on"
         },
         "hint": {
-          "en": "The status of the sunset from device is updated every 4 seconds."
+          "en": "The status of the sunset from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -178,7 +178,7 @@
           "en": "Sunset is off"
         },
         "hint": {
-          "en": "The status of the sunset from device is updated every 4 seconds."
+          "en": "The status of the sunset from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -203,7 +203,7 @@
           "en": "Relax breathe is on"
         },
         "hint": {
-          "en": "The status of the relax breathe from device is updated every 4 seconds."
+          "en": "The status of the relax breathe from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -228,7 +228,7 @@
           "en": "Relax breathe is off"
         },
         "hint": {
-          "en": "The status of the relax breathe from device is updated every 4 seconds."
+          "en": "The status of the relax breathe from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -253,7 +253,7 @@
           "en": "Bedtime tracking is on"
         },
         "hint": {
-          "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+          "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -278,7 +278,7 @@
           "en": "Bedtime tracking is off"
         },
         "hint": {
-          "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+          "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
         },
         "tokens": [
           {
@@ -305,7 +305,7 @@
           "en": "Main light is !{{on|off}}"
         },
         "hint": {
-          "en": "The status of the main light from device is updated every 4 seconds."
+          "en": "The status of the main light from device is updated every [functions_polling_frequency] seconds."
         },
         "args": [
           {
@@ -321,7 +321,7 @@
           "en": "Night light is !{{on|off}}"
         },
         "hint": {
-          "en": "The status of the night light from device is updated every 4 seconds."
+          "en": "The status of the night light from device is updated every [functions_polling_frequency] seconds."
         },
         "args": [
           {
@@ -337,7 +337,7 @@
           "en": "Sunset is !{{on|off}}"
         },
         "hint": {
-          "en": "The status of the sunset from device is updated every 4 seconds."
+          "en": "The status of the sunset from device is updated every [functions_polling_frequency] seconds."
         },
         "args": [
           {
@@ -353,7 +353,7 @@
           "en": "Relax breathe is !{{on|off}}"
         },
         "hint": {
-          "en": "The status of the relax breathe from device is updated every 4 seconds."
+          "en": "The status of the relax breathe from device is updated every [functions_polling_frequency] seconds."
         },
         "args": [
           {
@@ -369,7 +369,7 @@
           "en": "Bedtime tracking is !{{on|off}}"
         },
         "hint": {
-          "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+          "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
         },
         "args": [
           {
@@ -570,7 +570,7 @@
         "onoff.relax_breathe",
         "onoff.bedtime_tracking",
         "dim",
-        "button.restart"
+        "button.reset"
       ],
       "capabilitiesOptions": {
         "onoff.mainlight": {
@@ -606,13 +606,13 @@
             "en": ""
           }
         },
-        "button.restart": {
+        "button.reset": {
           "maintenanceAction": true,
           "title": {
-            "en": "Restart device"
+            "en": "Factory Reset"
           },
           "desc": {
-            "en": "If the device controller is not responding, restart the device may resolve the issue. After this action, please restart the application for best results."
+            "en": "This option will completely reset your device to factory settings."
           }
         }
       },
@@ -672,20 +672,20 @@
               "step": 1
             },
             {
-              "id": "sensors_polling_frequency",
+              "id": "functions_polling_frequency",
               "type": "number",
               "label": {
-                "en": "Sensors Polling Frequency"
+                "en": "Device Functions Polling Frequency"
               },
-              "value": 60,
-              "min": 1,
+              "value": 10,
+              "min": 4,
               "max": 86400,
-              "step": 10,
+              "step": 1,
               "units": {
                 "en": "sec"
               },
               "hint": {
-                "en": "This setting adjusts the frequency of the sensors polling."
+                "en": "This setting adjusts the frequency of the device functions and sensors polling."
               }
             },
             {
@@ -694,7 +694,7 @@
               "label": {
                 "en": "Alarms Polling Frequency"
               },
-              "value": 30,
+              "value": 60,
               "min": 1,
               "max": 1440,
               "step": 1,
@@ -752,7 +752,7 @@
                 "en": "Enable sunrise preview mode"
               },
               "hint": {
-                "en": "Activates the preview mode for sunrise and how it will look in alarm. Remember to turn this mode off when you finish testing."
+                "en": "Activates the preview mode for sunrise and how it will look in alarm."
               }
             },
             {
@@ -1056,6 +1056,18 @@
       ]
     }
   ],
+  "capabilities": {
+    "onoff_alarmclock": {
+      "type": "boolean",
+      "title": {
+        "en": "Alarm Clock"
+      },
+      "getable": true,
+      "setable": true,
+      "uiComponent": "button",
+      "icon": "/assets/alarm_clock.svg"
+    }
+  },
   "discovery": {
     "somneo-ssdp": {
       "type": "ssdp",

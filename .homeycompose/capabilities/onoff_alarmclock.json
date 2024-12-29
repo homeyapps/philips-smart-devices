@@ -1,0 +1,8 @@
+{
+  "type": "boolean",
+  "title": { "en": "Alarm Clock" },
+  "getable": true,
+  "setable": true,
+  "uiComponent": "button",
+  "icon": "/assets/alarm_clock.svg"
+}

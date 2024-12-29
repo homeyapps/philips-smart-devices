@@ -20,26 +20,26 @@
         "step": 1
       },
       {
-        "id": "sensors_polling_frequency",
+        "id": "functions_polling_frequency",
         "type": "number",
-        "label": { "en": "Sensors Polling Frequency" },
-        "value": 60,
-        "min": 1,
+        "label": { "en": "Device Functions Polling Frequency" },
+        "value": 10,
+        "min": 4,
         "max": 86400,
-        "step": 10,
+        "step": 1,
         "units": { "en": "sec" },
-        "hint": { "en": "This setting adjusts the frequency of the sensors polling." }
+        "hint": { "en": "This setting adjusts the frequency of the device functions and sensors polling." }
       },
       {
         "id": "alarms_polling_frequency",
         "type": "number",
         "label": { "en": "Alarms Polling Frequency" },
-        "value": 30,
+        "value": 60,
         "min": 1,
         "max": 1440,
         "step": 1,
         "units": { "en": "min" },
-        "hint": { "en": "This setting adjusts the frequency of the alarms polling." }
+        "hint": { "en": "This setting adjusts the frequency of the alarms polling. This value also affects the frequency of alarm updates when synchronisation with the application is enabled." }
       }
     ]
   },
@@ -75,7 +75,7 @@
         "type": "checkbox",
         "value": false,
         "label": { "en": "Enable sunrise preview mode" },
-        "hint": { "en": "Activates the preview mode for sunrise and how it will look in alarm. Remember to turn this mode off when you finish testing." }
+        "hint": { "en": "Activates the preview mode for sunrise and how it will look in alarm." }
       },
       {
         "id": "sunrise_color_scheme",

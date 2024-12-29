@@ -1,10 +1,8 @@
 'use strict';
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import axiosRetry, { exponentialDelay } from 'axios-retry';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import https from 'https';
 import LocalLogger from '../core/LocalLogger';
-import AxiosRateLimiter from '../core/AxiosRateLimiter';
 
 export interface ApiClientConfig {
     baseURL: string;
@@ -13,22 +11,18 @@ export interface ApiClientConfig {
     retryCount?: number;
     headers?: Record<string, string>;
     httpsAgent?: https.Agent;
-    rateLimiter?: AxiosRateLimiter;
 }
 
 export abstract class ApiClient {
 
     private readonly defaultTimeout = 10000;
-    private readonly defaultRetryCount = 3;
 
     private readonly log: LocalLogger;
     private readonly axiosInstance: AxiosInstance;
 
-    protected readonly rateLimiter?: AxiosRateLimiter;
-
     protected constructor(config: ApiClientConfig) {
       this.log = config.log;
-      this.rateLimiter = config.rateLimiter;
+
       this.axiosInstance = axios.create({
         baseURL: config.baseURL,
         timeout: config.timeout ?? this.defaultTimeout,
@@ -40,25 +34,12 @@ export abstract class ApiClient {
         httpsAgent: config.httpsAgent,
       });
 
-      axiosRetry(this.axiosInstance, {
-        retries: config.retryCount ?? this.defaultRetryCount,
-        retryDelay: exponentialDelay,
-        retryCondition: (error) => axiosRetry.isNetworkError(error) || axiosRetry.isRetryableError(error),
-      });
-
       this.setupInterceptors();
-    }
-
-    public cleanResources() {
-      if (this.rateLimiter !== null) {
-        this.rateLimiter?.destroy();
-      }
     }
 
     protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
       try {
-        const response: AxiosResponse<T> = await this.axiosInstance.get(url, config);
-        return response.data;
+        return (await this.axiosInstance.get(url, config)).data;
       } catch (error: unknown) {
         return this.handleError(error);
       }
@@ -66,8 +47,7 @@ export abstract class ApiClient {
 
     protected async put<T, R>(url: string, data: T, config?: AxiosRequestConfig): Promise<R> {
       try {
-        const response: AxiosResponse<R> = await this.axiosInstance.put(url, data, config);
-        return response.data;
+        return (await this.axiosInstance.put(url, data, config)).data;
       } catch (error: unknown) {
         return this.handleError(error);
       }
@@ -85,17 +65,12 @@ export abstract class ApiClient {
 
     private setupInterceptors(): void {
       this.axiosInstance.interceptors.request.use(
-        (requestConfig) => {
-          this.log.log(`Outgoing request: [${requestConfig.method?.toUpperCase()}] ${requestConfig.baseURL}${requestConfig.url}`);
-
-          if (requestConfig.data) {
-            this.log.debug('Request data:', requestConfig.data);
+        (request) => {
+          this.log.log(`Outgoing request: [${request.method?.toUpperCase()}] ${request.baseURL}${request.url}`);
+          if (request.data) {
+            this.log.debug('Request data:', request.data);
           }
-          if (this.rateLimiter !== undefined) {
-            return this.rateLimiter.request(requestConfig);
-          }
-
-          return requestConfig;
+          return request;
         },
         (error) => {
           this.log.error('Request error: ', error);

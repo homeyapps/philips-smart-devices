@@ -1,0 +1,37 @@
+<svg
+        version="1.1"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+>
+    <!-- Циферблат -->
+    <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="2" fill="none" />
+
+    <!-- Стрелка часов (короткая) -->
+    <path d="M 12 13 L 12 9"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          fill="none" />
+
+    <!-- Стрелка минут (длинная) -->
+    <path d="M 12 13 L 14 15"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          fill="none" />
+
+    <!-- «Колокольчики» сверху -->
+    <path d="M5 5 L7 3"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          fill="none" />
+    <path d="M19 5 L17 3"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          fill="none" />
+</svg>

@@ -46,8 +46,8 @@ export interface SomneoBedtimeTrackingSettings {
 
 export interface SomneoAlarm {
   prfnr: number; // The alarm's id/index
-  prfen: boolean; // Whether the alarm is activated or deactivated
-  prfvs: boolean; // Whether the alarm is enabled or disabled
+  prfen: boolean; // Whether the alarm is enabled or disabled
+  prfvs: boolean; // Whether the alarm is activated or deactivated
   pname: string; // The alarm's name
   almhr: number; // The alarm's hours
   almmn: number; // The alarm's minutes
@@ -63,6 +63,11 @@ export interface SomneoAlarmSchedules {
   almhr: number[]; // Alarms hours
   almmn: number[]; // Alarms minutes
   daynm: number[]; // Alarms days
+}
+
+export interface SomneoEvent {
+  event: string; // Event name
+  ltlvl: number; // The level of the main light
 }
 
 export interface HomeyAlarm {

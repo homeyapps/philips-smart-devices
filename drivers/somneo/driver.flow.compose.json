@@ -4,7 +4,7 @@
       "id": "onoff.mainlight_true",
       "title": { "en": "Main light is on" },
       "hint": {
-        "en": "The status of the main light from device is updated every 4 seconds."
+        "en": "The status of the main light from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -18,7 +18,7 @@
       "id": "onoff.mainlight_false",
       "title": { "en": "Main light is off" },
       "hint": {
-        "en": "The status of the main light from device is updated every 4 seconds."
+        "en": "The status of the main light from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -32,7 +32,7 @@
       "id": "onoff.nightlight_true",
       "title": { "en": "Night light is on" },
       "hint": {
-        "en": "The status of the night light from device is updated every 4 seconds."
+        "en": "The status of the night light from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -46,7 +46,7 @@
       "id": "onoff.nightlight_false",
       "title": { "en": "Night light is off" },
       "hint": {
-        "en": "The status of the night light from device is updated every 4 seconds."
+        "en": "The status of the night light from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -60,7 +60,7 @@
       "id": "onoff.sunset_true",
       "title": { "en": "Sunset is on" },
       "hint": {
-        "en": "The status of the sunset from device is updated every 4 seconds."
+        "en": "The status of the sunset from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -74,7 +74,7 @@
       "id": "onoff.sunset_false",
       "title": { "en": "Sunset is off" },
       "hint": {
-        "en": "The status of the sunset from device is updated every 4 seconds."
+        "en": "The status of the sunset from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -88,7 +88,7 @@
       "id": "onoff.relax_breathe_true",
       "title": { "en": "Relax breathe is on" },
       "hint": {
-        "en": "The status of the relax breathe from device is updated every 4 seconds."
+        "en": "The status of the relax breathe from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -102,7 +102,7 @@
       "id": "onoff.relax_breathe_false",
       "title": { "en": "Relax breathe is off" },
       "hint": {
-        "en": "The status of the relax breathe from device is updated every 4 seconds."
+        "en": "The status of the relax breathe from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -116,7 +116,7 @@
       "id": "onoff.bedtime_tracking_true",
       "title": { "en": "Bedtime tracking is on" },
       "hint": {
-        "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+        "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -130,7 +130,7 @@
       "id": "onoff.bedtime_tracking_false",
       "title": { "en": "Bedtime tracking is off" },
       "hint": {
-        "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+        "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
       },
       "tokens": [
         {
@@ -148,7 +148,7 @@
         "en": "Main light is !{{on|off}}"
       },
       "hint": {
-        "en": "The status of the main light from device is updated every 4 seconds."
+        "en": "The status of the main light from device is updated every [functions_polling_frequency] seconds."
       }
     },
     {
@@ -157,7 +157,7 @@
         "en": "Night light is !{{on|off}}"
       },
       "hint": {
-        "en": "The status of the night light from device is updated every 4 seconds."
+        "en": "The status of the night light from device is updated every [functions_polling_frequency] seconds."
       }
     },
     {
@@ -166,7 +166,7 @@
         "en": "Sunset is !{{on|off}}"
       },
       "hint": {
-        "en": "The status of the sunset from device is updated every 4 seconds."
+        "en": "The status of the sunset from device is updated every [functions_polling_frequency] seconds."
       }
     },
     {
@@ -175,7 +175,7 @@
         "en": "Relax breathe is !{{on|off}}"
       },
       "hint": {
-        "en": "The status of the relax breathe from device is updated every 4 seconds."
+        "en": "The status of the relax breathe from device is updated every [functions_polling_frequency] seconds."
       }
     },
     {
@@ -184,7 +184,7 @@
         "en": "Bedtime tracking is !{{on|off}}"
       },
       "hint": {
-        "en": "The status of the bedtime tracking from device is updated every 4 seconds."
+        "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
       }
     }
   ],

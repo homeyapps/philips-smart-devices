@@ -5,17 +5,19 @@ import Homey from 'homey';
 module.exports = class SomneoDriver extends Homey.Driver {
 
   async onInit() {
-    this.log('SomneoDriver has been initialized');
+    this.log('Somneo driver has been initialized');
   }
 
   async onPairListDevices() {
-    const discoveryResults = this.getDiscoveryStrategy().getDiscoveryResults();
+    const discoveryResults = Object.values(this.getDiscoveryStrategy().getDiscoveryResults());
+    const isOneDevice = discoveryResults.length <= 1;
 
-    return Object.values(discoveryResults).map((discoveryResult) => {
+    return discoveryResults.map((discoveryResult) => {
       return {
-        name: 'Philips Somneo',
+        name: `${isOneDevice ? 'Philips Somneo' : `Somneo: ip-ends with: ${discoveryResult.address}`.split('.').pop()}`,
         data: {
           id: discoveryResult.id,
+          address: discoveryResult.address,
         },
       };
     });
