@@ -13,5 +13,8 @@
   },
   "1.2.2": {
     "en": "Changed discovery strategy to SSDP"
+  },
+  "1.3.0": {
+    "en": "Added new features: ID's for multiply devices in seacrh list. Fixed: Device stability, Alarms clocks syncing with Homey application, Alarms on/off ability in Homey application"
   }
 }
