@@ -702,7 +702,7 @@
                 "en": "min"
               },
               "hint": {
-                "en": "This setting adjusts the frequency of the alarms polling."
+                "en": "This setting adjusts the frequency of the alarms polling. This value also affects the frequency of alarm updates when synchronisation with the application is enabled."
               }
             }
           ]
