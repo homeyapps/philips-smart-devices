@@ -283,6 +283,25 @@
           ]
         }
       ]
+    },
+    {
+      "id": "onoff.aod_activate",
+      "title": {
+        "en": "... always on display"
+      },
+      "titleFormatted": {
+        "en": "[[state]] always on display"
+      },
+      "args": [
+        {
+          "name": "state",
+          "type": "dropdown",
+          "values": [
+            { "id": "true", "label": { "en": "Activate" } },
+            { "id": "false", "label": { "en": "Deactivate" } }
+          ]
+        }
+      ]
     }
   ]
 }

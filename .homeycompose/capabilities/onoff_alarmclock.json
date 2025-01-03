@@ -1,6 +1,9 @@
 {
   "type": "boolean",
+  "insights": true,
   "title": { "en": "Alarm Clock" },
+  "insightsTitleTrue": { "en": "Alarm clock turned on" },
+  "insightsTitleFalse": { "en": "Alarm clock turned off" },
   "getable": true,
   "setable": true,
   "uiComponent": "button",

@@ -36,6 +36,7 @@ module.exports = class SomneoDevice extends Homey.Device {
     this.functionsUpdateInterval = this.homey.setInterval(() => this.syncDeviceFunctions(), this.getSetting('functions_polling_frequency') * 1000);
     this.alarmsUpdateInterval = this.homey.setInterval(() => this.syncSomneoAlarms(), this.getSetting('alarms_polling_frequency') * 60000);
 
+    await this.setStoreValue('polling_enabled', true).catch(this.error);
     this.log('Somneo device has been initialized');
   }
 
@@ -49,10 +50,6 @@ module.exports = class SomneoDevice extends Homey.Device {
   }
 
   async onDiscoveryAddressChanged(discoveryResult: DiscoveryResultMDNSSD) {
-    await this.onDiscoveryAvailable(discoveryResult);
-  }
-
-  async onDiscoveryLastSeenChanged(discoveryResult: DiscoveryResultMDNSSD) {
     await this.onDiscoveryAvailable(discoveryResult);
   }
 
@@ -344,6 +341,22 @@ module.exports = class SomneoDevice extends Homey.Device {
         this.error('Error resetting device:', error);
       }
     });
+
+    this.registerCapabilityListener('button.polling', async () => {
+      const pollingEnabled = !this.getStoreValue('polling_enabled');
+
+      if (pollingEnabled) {
+        this.functionsUpdateInterval = this.homey.setInterval(() => this.syncDeviceFunctions(), this.getSetting('functions_polling_frequency') * 1000);
+        this.alarmsUpdateInterval = this.homey.setInterval(() => this.syncSomneoAlarms(), this.getSetting('alarms_polling_frequency') * 60000);
+        await this.homey.notifications.createNotification({ excerpt: `${this.getName()} polling interval enabled` });
+      } else {
+        this.homey.clearInterval(this.alarmsUpdateInterval);
+        this.homey.clearInterval(this.functionsUpdateInterval);
+        await this.homey.notifications.createNotification({ excerpt: `${this.getName()} polling interval disabled` });
+      }
+
+      await this.setStoreValue('polling_enabled', pollingEnabled).catch(this.error);
+    });
   }
 
   private registerAlarmsListeners(capabilityID: string | undefined = undefined) {
@@ -390,19 +403,24 @@ module.exports = class SomneoDevice extends Homey.Device {
     });
 
     this.homey.flow.getActionCard('onoff.mainlight_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.mainlight', state).catch(this.error);
+      await this.triggerCapabilityListener('onoff.mainlight', args.state === 'true').catch(this.error);
     });
     this.homey.flow.getActionCard('onoff.nightlight_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.nightlight', state).catch(this.error);
+      await this.triggerCapabilityListener('onoff.nightlight', args.state === 'true').catch(this.error);
     });
     this.homey.flow.getActionCard('onoff.sunset_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.sunset', state).catch(this.error);
+      await this.triggerCapabilityListener('onoff.sunset', args.state === 'true').catch(this.error);
     });
     this.homey.flow.getActionCard('onoff.relax_breathe_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.relax_breathe', state).catch(this.error);
+      await this.triggerCapabilityListener('onoff.relax_breathe', args.state === 'true').catch(this.error);
     });
     this.homey.flow.getActionCard('onoff.bedtime_tracking_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.bedtime_tracking', state).catch(this.error);
+      await this.triggerCapabilityListener('onoff.bedtime_tracking', args.state === 'true').catch(this.error);
+    });
+    this.homey.flow.getActionCard('onoff.aod_activate').registerRunListener(async (args, state) => {
+      await this.limiter.schedule(async () => {
+        await this.somneoClient?.toggleAlwaysOnDisplay(args.state === 'true').catch(this.error);
+      });
     });
   }
 

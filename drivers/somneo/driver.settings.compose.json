@@ -28,7 +28,8 @@
         "max": 86400,
         "step": 1,
         "units": { "en": "sec" },
-        "hint": { "en": "This setting adjusts the frequency of the device functions and sensors polling." }
+        "hint": { "en": "This setting adjusts the frequency of the device functions and sensors polling." },
+        "highlight": true
       },
       {
         "id": "alarms_polling_frequency",
@@ -39,7 +40,8 @@
         "max": 1440,
         "step": 1,
         "units": { "en": "min" },
-        "hint": { "en": "This setting adjusts the frequency of the alarms polling. This value also affects the frequency of alarm updates when synchronisation with the application is enabled." }
+        "hint": { "en": "This setting adjusts the frequency of the alarms polling. This value also affects the frequency of alarm updates when synchronisation with the application is enabled." },
+        "highlight": true
       }
     ]
   },

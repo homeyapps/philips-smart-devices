@@ -83,6 +83,10 @@ export default class SomneoClient extends ApiClient {
     return this.get<SomneoBedtimeTrackingSettings>('/wungt');
   }
 
+  public toggleAlwaysOnDisplay(aod: boolean): Promise<SomneoStatusesData> {
+    return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { dspon: aod });
+  }
+
   public changeDisplaySettings(aod: boolean, brightness: number): Promise<SomneoStatusesData> {
     return this.put<SomneoStatusesData, SomneoStatusesData>('/wusts', { dspon: aod, brght: brightness });
   }

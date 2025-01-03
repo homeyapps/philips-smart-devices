@@ -550,6 +550,40 @@
             ]
           }
         ]
+      },
+      {
+        "id": "onoff.aod_activate",
+        "title": {
+          "en": "... always on display"
+        },
+        "titleFormatted": {
+          "en": "[[state]] always on display"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          },
+          {
+            "name": "state",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "true",
+                "label": {
+                  "en": "Activate"
+                }
+              },
+              {
+                "id": "false",
+                "label": {
+                  "en": "Deactivate"
+                }
+              }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -570,32 +604,63 @@
         "onoff.relax_breathe",
         "onoff.bedtime_tracking",
         "dim",
+        "button.polling",
         "button.reset"
       ],
       "capabilitiesOptions": {
         "onoff.mainlight": {
           "title": {
             "en": "Main Light"
+          },
+          "insightsTitleTrue": {
+            "en": "Main light turned on"
+          },
+          "insightsTitleFalse": {
+            "en": "Main light turned off"
           }
         },
         "onoff.nightlight": {
           "title": {
             "en": "Night Light"
+          },
+          "insightsTitleTrue": {
+            "en": "Night light turned on"
+          },
+          "insightsTitleFalse": {
+            "en": "Night light turned off"
           }
         },
         "onoff.sunset": {
           "title": {
             "en": "Sunset"
+          },
+          "insightsTitleTrue": {
+            "en": "Sunset turned on"
+          },
+          "insightsTitleFalse": {
+            "en": "Sunset turned off"
           }
         },
         "onoff.relax_breathe": {
           "title": {
             "en": "Relax Breathe"
+          },
+          "insightsTitleTrue": {
+            "en": "RelaxBreathe turned on"
+          },
+          "insightsTitleFalse": {
+            "en": "RelaxBreathe turned off"
           }
         },
         "onoff.bedtime_tracking": {
           "title": {
             "en": "Bedtime Tracking"
+          },
+          "insightsTitleTrue": {
+            "en": "Bedtime tracking turned on"
+          },
+          "insightsTitleFalse": {
+            "en": "Bedtime tracking turned off"
           }
         },
         "dim": {
@@ -604,6 +669,15 @@
           "step": 1,
           "units": {
             "en": ""
+          }
+        },
+        "button.polling": {
+          "maintenanceAction": true,
+          "title": {
+            "en": "Start/Stop Polling"
+          },
+          "desc": {
+            "en": "A feature of the Philips device is the rate limits for requests to the device itself, so in order to avoid reboots and still want to use the official app, please use this button to enable or disable polling."
           }
         },
         "button.reset": {
@@ -686,7 +760,8 @@
               },
               "hint": {
                 "en": "This setting adjusts the frequency of the device functions and sensors polling."
-              }
+              },
+              "highlight": true
             },
             {
               "id": "alarms_polling_frequency",
@@ -703,7 +778,8 @@
               },
               "hint": {
                 "en": "This setting adjusts the frequency of the alarms polling. This value also affects the frequency of alarm updates when synchronisation with the application is enabled."
-              }
+              },
+              "highlight": true
             }
           ]
         },
@@ -1059,8 +1135,15 @@
   "capabilities": {
     "onoff_alarmclock": {
       "type": "boolean",
+      "insights": true,
       "title": {
         "en": "Alarm Clock"
+      },
+      "insightsTitleTrue": {
+        "en": "Alarm clock turned on"
+      },
+      "insightsTitleFalse": {
+        "en": "Alarm clock turned off"
       },
       "getable": true,
       "setable": true,
