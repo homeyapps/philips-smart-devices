@@ -16,5 +16,8 @@
   },
   "1.3.0": {
     "en": "Added new features: ID's for multiply devices in seacrh list. Fixed: Device stability, Alarms clocks syncing with Homey application, Alarms on/off ability in Homey application"
+  },
+  "1.4.0": {
+    "en": "Added new features: always on display flow, new maintenance action, insights logs and decreased requests count. Fixed: flow action cards"
   }
 }
