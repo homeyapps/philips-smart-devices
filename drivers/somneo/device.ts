@@ -44,9 +44,12 @@ module.exports = class SomneoDevice extends Homey.Device {
     this.homeyClient = await HomeyAPI.createAppAPI({ homey: this.homey });
     this.somneoClient = new SomneoClient(discoveryResult.address, this.localLogger);
 
+    this.syncDeviceSettings();
     await this.syncDeviceFunctions();
     await this.syncSomneoAlarms();
     this.registerAlarmsListeners();
+
+    this.log('Discovery Available');
   }
 
   async onDiscoveryAddressChanged(discoveryResult: DiscoveryResultMDNSSD) {
@@ -92,6 +95,10 @@ module.exports = class SomneoDevice extends Homey.Device {
       this.homey.setTimeout(async () => {
         await this.somneoClient?.toggleSunrisePreview(true, Number(newSettings.sunrise_color_scheme)).catch(this.error);
       }, 5000);
+    }
+
+    if (changedKeys.includes('radio_frequency')) {
+
     }
 
     this.log('Somneo device settings were changed');
@@ -421,6 +428,12 @@ module.exports = class SomneoDevice extends Homey.Device {
       await this.limiter.schedule(async () => {
         await this.somneoClient?.toggleAlwaysOnDisplay(args.state === 'true').catch(this.error);
       });
+    });
+  }
+
+  private syncDeviceSettings() {
+    this.homey.settings.on('set', (value) => {
+      this.log(value);
     });
   }
 

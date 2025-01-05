@@ -14,7 +14,7 @@
   "description": {
     "en": "Add your Philips smart devices to the Homey ecosystem"
   },
-  "category": "lights",
+  "category": "appliances",
   "tags": {
     "en": [
       "philips",
@@ -592,7 +592,7 @@
       "name": {
         "en": "Somneo Sleep & Wake-up Light"
       },
-      "class": "socket",
+      "class": "sensor",
       "capabilities": [
         "measure_temperature",
         "measure_humidity",
@@ -605,7 +605,16 @@
         "onoff.bedtime_tracking",
         "dim",
         "button.polling",
-        "button.reset"
+        "button.reset",
+        "media_input",
+        "speaker_playing",
+        "speaker_stop",
+        "speaker_next",
+        "speaker_prev",
+        "speaker_artist",
+        "speaker_album",
+        "speaker_track",
+        "volume_set"
       ],
       "capabilitiesOptions": {
         "onoff.mainlight": {
@@ -688,6 +697,22 @@
           "desc": {
             "en": "This option will completely reset your device to factory settings."
           }
+        },
+        "media_input": {
+          "values": [
+            {
+              "id": "fmr",
+              "title": {
+                "en": "Radio"
+              }
+            },
+            {
+              "id": "aux",
+              "title": {
+                "en": "AUX"
+              }
+            }
+          ]
         }
       },
       "platforms": [
@@ -1126,6 +1151,68 @@
               "min": 1,
               "max": 25,
               "step": 1
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Radio Channels"
+          },
+          "children": [
+            {
+              "id": "radio_channel",
+              "type": "dropdown",
+              "value": "1",
+              "label": {
+                "en": "Radio Channel"
+              },
+              "values": [
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "Channel 1"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "Channel 2"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "Channel 3"
+                  }
+                },
+                {
+                  "id": "4",
+                  "label": {
+                    "en": "Channel 4"
+                  }
+                },
+                {
+                  "id": "5",
+                  "label": {
+                    "en": "Channel 5"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "radio_frequency",
+              "type": "number",
+              "label": {
+                "en": "Radio Frequency"
+              },
+              "value": 87.5,
+              "min": 87.5,
+              "max": 108,
+              "step": 0.1,
+              "units": {
+                "en": "FM"
+              }
             }
           ]
         }
