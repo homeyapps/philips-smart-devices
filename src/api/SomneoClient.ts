@@ -4,7 +4,7 @@ import https from 'https';
 import { ApiClient } from './ApiClient';
 import LocalLogger from '../core/LocalLogger';
 import {
-  HomeyAlarm, SomneoAlarm,
+  AlarmClock, SomneoAlarm,
   SomneoAlarms,
   SomneoAlarmSchedules,
   SomneoBedtimeTrackingSettings, SomneoEvent,
@@ -140,7 +140,7 @@ export default class SomneoClient extends ApiClient {
     return this.put<unknown, SomneoBedtimeTrackingSettings>('/wungt', { night: enabled });
   }
 
-  public async getAlarms(): Promise<HomeyAlarm[]> {
+  public async getAlarms(): Promise<AlarmClock[]> {
     const alarms = await this.get<SomneoAlarms>('/wualm/aenvs');
     const times = await this.get<SomneoAlarmSchedules>('/wualm/aalms');
 

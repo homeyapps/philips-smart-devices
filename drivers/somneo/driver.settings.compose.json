@@ -52,15 +52,23 @@
     },
     "children": [
       {
-        "id": "alarms_device_sync",
+        "id": "alarms_capabilities_sync",
         "type": "checkbox",
-        "value": false,
-        "label": { "en": "Synchronize Device Alarms" },
+        "value": true,
+        "label": { "en": "Synchronize Alarms Capabilities" },
         "hint": { "en": "If enabled, the alarms set in the Homey application will be created/updated from the device alarms. \n\nImportant: Your device's alarm polling frequency setting determines the update interval of alarms in the application." },
         "highlight": true
       },
       {
-        "id": "alarms_generative_name",
+        "id": "alarms_application_sync",
+        "type": "checkbox",
+        "value": false,
+        "label": { "en": "Synchronize Application Alarms" },
+        "hint": { "en": "If enabled, the alarms set in the Homey application will be created/updated from the device alarms. \n\nImportant: Your device's alarm polling frequency setting determines the update interval of alarms in the application." },
+        "highlight": true
+      },
+      {
+        "id": "alarms_sync_name",
         "type": "text",
         "label": { "en": "Alarm Name" },
         "value": "Philips Somneo",
@@ -298,42 +306,94 @@
     },
     "children": [
       {
-        "id": "radio_channel",
-        "type": "dropdown",
-        "value": "1",
-        "label": { "en": "Radio Channel" },
-        "values": [
-          {
-            "id": "1",
-            "label": { "en": "Channel 1" }
-          },
-          {
-            "id": "2",
-            "label": { "en": "Channel 2" }
-          },
-          {
-            "id": "3",
-            "label": { "en": "Channel 3" }
-          },
-          {
-            "id": "4",
-            "label": { "en": "Channel 4" }
-          },
-          {
-            "id": "5",
-            "label": { "en": "Channel 5" }
-          }
-        ]
+        "id": "name_ch1",
+        "type": "text",
+        "label": { "en": "Radio Chanel Name" },
+        "value": "Channel 1",
+        "hint": { "en": "Name of radio channel #1." }
       },
       {
-        "id": "radio_frequency",
+        "id": "frequency_ch1",
         "type": "number",
         "label": { "en": "Radio Frequency" },
         "value": 87.5,
         "min": 87.5,
         "max": 108.0,
         "step": 0.1,
-        "units": { "en": "FM" }
+        "units": { "en": "FM" },
+        "hint": { "en": "Frequency of radio channel #1." }
+      },
+      {
+        "id": "name_ch2",
+        "type": "text",
+        "label": { "en": "Radio Chanel Name" },
+        "value": "Channel 2",
+        "hint": { "en": "Name of radio channel #2." }
+      },
+      {
+        "id": "frequency_ch2",
+        "type": "number",
+        "label": { "en": "Radio Frequency" },
+        "value": 87.5,
+        "min": 87.5,
+        "max": 108.0,
+        "step": 0.1,
+        "units": { "en": "FM" },
+        "hint": { "en": "Frequency of radio channel #2." }
+      },
+      {
+        "id": "name_ch3",
+        "type": "text",
+        "label": { "en": "Radio Chanel Name" },
+        "value": "Channel 3",
+        "hint": { "en": "Name of radio channel #3." }
+      },
+      {
+        "id": "frequency_ch3",
+        "type": "number",
+        "label": { "en": "Radio Frequency" },
+        "value": 87.5,
+        "min": 87.5,
+        "max": 108.0,
+        "step": 0.1,
+        "units": { "en": "FM" },
+        "hint": { "en": "Frequency of radio channel #3." }
+      },
+      {
+        "id": "name_ch4",
+        "type": "text",
+        "label": { "en": "Radio Chanel Name" },
+        "value": "Channel 4",
+        "hint": { "en": "Name of radio channel #4." }
+      },
+      {
+        "id": "frequency_ch4",
+        "type": "number",
+        "label": { "en": "Radio Frequency" },
+        "value": 87.5,
+        "min": 87.5,
+        "max": 108.0,
+        "step": 0.1,
+        "units": { "en": "FM" },
+        "hint": { "en": "Frequency of radio channel #4." }
+      },
+      {
+        "id": "name_ch5",
+        "type": "text",
+        "label": { "en": "Radio Chanel Name" },
+        "value": "Channel 5",
+        "hint": { "en": "Name of radio channel #5." }
+      },
+      {
+        "id": "frequency_ch5",
+        "type": "number",
+        "label": { "en": "Radio Frequency" },
+        "value": 87.5,
+        "min": 87.5,
+        "max": 108.0,
+        "step": 0.1,
+        "units": { "en": "FM" },
+        "hint": { "en": "Frequency of radio channel #5." }
       }
     ]
   }

@@ -70,7 +70,7 @@ export interface SomneoEvent {
   ltlvl: number; // The level of the main light
 }
 
-export interface HomeyAlarm {
+export interface AlarmClock {
   id: number;
   enabled: boolean;
   powerWakeEnabled: boolean;
