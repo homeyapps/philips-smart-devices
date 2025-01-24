@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.philips.smart-devices",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "compatibility": ">=12.2.0",
   "platforms": [
     "local"
@@ -846,10 +846,10 @@
         "button.force_sync": {
           "maintenanceAction": true,
           "title": {
-            "en": "Forcibly Synchronise Alarms"
+            "en": "Alarms Force Synchronise"
           },
           "desc": {
-            "en": ""
+            "en": "If you need to synchronise your alarms now without waiting for the alarm polling interval to start, then just use this function to synchronise them immediately."
           }
         },
         "button.polling": {
