@@ -4,7 +4,7 @@ import https from 'https';
 import { ApiClient } from './ApiClient';
 import LocalLogger from '../core/LocalLogger';
 import {
-  AlarmClock, SomneoAlarm,
+  AlarmClock, PlayerSettings, RadioChannelsFrequencies, SomneoAlarm,
   SomneoAlarms,
   SomneoAlarmSchedules,
   SomneoBedtimeTrackingSettings, SomneoEvent,
@@ -18,6 +18,9 @@ import {
 export default class SomneoClient extends ApiClient {
 
   public readonly events = {
+    wakeupOn: 'startwakeup',
+    wakeupOff: 'endwakeup',
+    alarmOff: 'endalarm',
     mainLightOn: 'startlight',
     mainLightOff: 'stoplight',
     nightLightOn: 'nightlighton',
@@ -55,6 +58,10 @@ export default class SomneoClient extends ApiClient {
           rejectUnauthorized: false,
           keepAlive: true,
         }),
+        limiter: {
+          maxConcurrent: 1,
+          minTime: 1000,
+        },
       },
     );
   }
@@ -147,18 +154,64 @@ export default class SomneoClient extends ApiClient {
     return alarms.prfen.map((enabled, index) => ({
       id: index + 1,
       enabled,
-      powerWakeEnabled: alarms.pwrsv[index] === 1,
+      powerWakeEnabled: alarms.pwrsv[index * 3] === 255,
       time: `${times.almhr[index].toString().padStart(2, '0')}:${times.almmn[index].toString().padStart(2, '0')}`,
       repetition: this.daysIntToAlarmDays(times.daynm[index]),
     })).filter((_, index) => alarms.prfvs[index]);
+  }
+
+  public async setAlarm(alarm: AlarmClock, enabled: boolean = false): Promise<SomneoAlarm> {
+    const [hour, minute] = alarm.time.split(':').map(Number);
+    const alarmID = (await this.get<SomneoAlarms>('/wualm/aenvs')).prfvs.findIndex((enabled) => !enabled) + 1;
+
+    if (alarmID === -1) {
+      throw new Error('No available alarm slots');
+    }
+
+    return this.put<SomneoAlarm, SomneoAlarm>('/wualm/prfwu', {
+      prfnr: alarmID,
+      prfen: enabled,
+      prfvs: true,
+      almhr: hour,
+      almmn: minute,
+      daynm: this.alarmDaysToDaysInt(alarm.repetition as Record<string, boolean>),
+    });
   }
 
   public toggleAlarm(enabled: boolean, id: number): Promise<SomneoAlarm> {
     return this.put<unknown, SomneoAlarm>('/wualm/prfwu', { prfnr: id, prfen: enabled });
   }
 
+  public deleteAlarm(id: number): Promise<SomneoAlarm> {
+    return this.put<unknown, SomneoAlarm>('/wualm/prfwu', { prfnr: id, prfvs: false });
+  }
+
   public getLastEvent(): Promise<SomneoEvent> {
     return this.get<SomneoEvent>('/dataupload/event.1/data');
+  }
+
+  public togglePlayer(enabled: boolean): Promise<PlayerSettings> {
+    return this.put<unknown, PlayerSettings>('/wuply', { onoff: enabled });
+  }
+
+  public changePlayerSource(source: string): Promise<PlayerSettings> {
+    return this.put<unknown, PlayerSettings>('/wuply', { snddv: source });
+  }
+
+  public changePlayerVolume(volume: number): Promise<PlayerSettings> {
+    return this.put<unknown, PlayerSettings>('/wuply', { sdvol: volume });
+  }
+
+  public getRadioChannelsFrequencies(): Promise<RadioChannelsFrequencies> {
+    return this.get<RadioChannelsFrequencies>('/wufmp/00');
+  }
+
+  public changeRadioChannelsFrequencies(channels: RadioChannelsFrequencies): Promise<RadioChannelsFrequencies> {
+    return this.put<RadioChannelsFrequencies, RadioChannelsFrequencies>('/wufmp/00', channels);
+  }
+
+  public changeRadioChannel(channel: string): Promise<PlayerSettings> {
+    return this.put<unknown, PlayerSettings>('/wuply', { sndch: channel });
   }
 
   private daysIntToAlarmDays(daysInt: number): Record<string, boolean> {
@@ -169,6 +222,20 @@ export default class SomneoClient extends ApiClient {
       result[day] = activeDays.includes(day);
       return result;
     }, {} as Record<string, boolean>);
+  }
+
+  private alarmDaysToDaysInt(repetition: Record<string, boolean>): number {
+    const allDays: Record<string, number> = {
+      monday: 2,
+      tuesday: 4,
+      wednesday: 8,
+      thursday: 16,
+      friday: 32,
+      saturday: 64,
+      sunday: 128,
+    };
+
+    return Object.entries(repetition).filter(([, enabled]) => enabled).reduce((result, [day]) => result | allDays[day], 0);
   }
 
 }

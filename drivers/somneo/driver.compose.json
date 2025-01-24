@@ -8,23 +8,24 @@
     "measure_humidity",
     "measure_luminance",
     "measure_noise",
+    "alarmclock_state.sunrise",
+    "alarmclock_state.alarm",
     "onoff.mainlight",
     "onoff.nightlight",
     "onoff.sunset",
     "onoff.relax_breathe",
     "onoff.bedtime_tracking",
     "dim",
-    "button.polling",
-    "button.reset",
     "media_input",
+    "volume_set",
     "speaker_playing",
-    "speaker_stop",
+    "speaker_track",
+    "speaker_artist",
     "speaker_next",
     "speaker_prev",
-    "speaker_artist",
-    "speaker_album",
-    "speaker_track",
-    "volume_set"
+    "button.force_sync",
+    "button.polling",
+    "button.reset"
   ],
   "capabilitiesOptions": {
     "onoff.mainlight": {
@@ -83,20 +84,13 @@
       }
     },
     "dim": {
+      "title": {
+        "en": "Dim Level"
+      },
       "min": 1,
       "max": 25,
       "step": 1,
       "units": { "en": "" }
-    },
-    "button.polling": {
-      "maintenanceAction": true,
-      "title": { "en": "Start/Stop Polling" },
-      "desc": { "en":  "A feature of the Philips device is the rate limits for requests to the device itself, so in order to avoid reboots and still want to use the official app, please use this button to enable or disable polling." }
-    },
-    "button.reset": {
-      "maintenanceAction": true,
-      "title": { "en": "Factory Reset" },
-      "desc": { "en":  "This option will completely reset your device to factory settings." }
     },
     "media_input": {
       "values": [
@@ -109,6 +103,30 @@
           "title": { "en": "AUX" }
         }
       ]
+    },
+    "volume_set": {
+      "title": {
+        "en": "Set Volume"
+      },
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "units": { "en": "" }
+    },
+    "button.force_sync": {
+      "maintenanceAction": true,
+      "title": { "en": "Alarms Force Synchronise" },
+      "desc": { "en":  "If you need to synchronise your alarms now without waiting for the alarm polling interval to start, then just use this function to synchronise them immediately." }
+    },
+    "button.polling": {
+      "maintenanceAction": true,
+      "title": { "en": "Start/Stop Polling" },
+      "desc": { "en":  "A feature of the Philips device is the rate limits for requests to the device itself, so in order to avoid reboots and still want to use the official app, please use this button to enable or disable polling." }
+    },
+    "button.reset": {
+      "maintenanceAction": true,
+      "title": { "en": "Factory Reset" },
+      "desc": { "en":  "This option will completely reset your device to factory settings." }
     }
   },
   "platforms": [

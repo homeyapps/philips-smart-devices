@@ -46,11 +46,13 @@ export interface SomneoBedtimeTrackingSettings {
 
 export interface SomneoAlarm {
   prfnr: number; // The alarm's id/index
-  prfen: boolean; // Whether the alarm is enabled or disabled
-  prfvs: boolean; // Whether the alarm is activated or deactivated
-  pname: string; // The alarm's name
+  prfen: boolean; // Whether the alarm is activated or deactivated
+  prfvs: boolean; // Whether the alarm is enabled or disabled
+  pname?: string; // The alarm's name
   almhr: number; // The alarm's hours
   almmn: number; // The alarm's minutes
+  daynm?: number; // The alarm's repetition
+  pwrsz?: number; // Whether the PowerWake activated or deactivated
 }
 
 export interface SomneoAlarms {
@@ -70,10 +72,26 @@ export interface SomneoEvent {
   ltlvl: number; // The level of the main light
 }
 
+export interface PlayerSettings {
+  onoff?: boolean, // Whether the player is enabled or not
+  sdvol?: number, // The sound level of the player
+  tempy?: boolean, // Whether the sound preview is enabled or not
+  snddv?: string, // Player source
+  sndch?: string // FM radio channel
+}
+
+export interface RadioChannelsFrequencies {
+  1?: string
+  2?: string
+  3?: string
+  4?: string
+  5?: string
+}
+
 export interface AlarmClock {
   id: number;
-  enabled: boolean;
-  powerWakeEnabled: boolean;
+  enabled?: boolean;
+  powerWakeEnabled?: boolean;
   time: string;
   repetition?: object;
 }

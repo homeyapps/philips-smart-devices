@@ -1,0 +1,7 @@
+{
+  "type": "boolean",
+  "title": { "en": "Alarm Clock State" },
+  "getable": true,
+  "setable": false,
+  "uiComponent": null
+}

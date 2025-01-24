@@ -48,31 +48,32 @@
   {
     "type": "group",
     "label": {
-      "en": "Alarms"
+      "en": "Alarm Clock"
     },
     "children": [
       {
-        "id": "alarms_capabilities_sync",
-        "type": "checkbox",
-        "value": true,
-        "label": { "en": "Synchronize Alarms Capabilities" },
-        "hint": { "en": "If enabled, the alarms set in the Homey application will be created/updated from the device alarms. \n\nImportant: Your device's alarm polling frequency setting determines the update interval of alarms in the application." },
+        "id": "label",
+        "type": "label",
+        "label": { "en": "How to create an alarm clock?" },
+        "value": "Instruction",
+        "hint": { "en": "To create an alarm from the Homey application, use the same name specified in the 'Alarms Synchronisation Name' settings field.\n\nYou can use any name for the alarm, as long as it contains this field case-sensitive. Once the alarms are synchronized and created on the device, you can rename the alarm in the app as you wish." },
         "highlight": true
       },
       {
-        "id": "alarms_application_sync",
+        "id": "application_alarms_sync",
         "type": "checkbox",
         "value": false,
         "label": { "en": "Synchronize Application Alarms" },
-        "hint": { "en": "If enabled, the alarms set in the Homey application will be created/updated from the device alarms. \n\nImportant: Your device's alarm polling frequency setting determines the update interval of alarms in the application." },
+        "hint": { "en": "If enabled, alarms set in the Homey app will be created, updated, and deleted based on the alarms in your device. This works both ways, i.e. if you create an alarm in the app it will automatically appear on the device, etc." },
         "highlight": true
       },
       {
         "id": "alarms_sync_name",
         "type": "text",
-        "label": { "en": "Alarm Name" },
+        "label": { "en": "Alarms Synchronization Name" },
         "value": "Philips Somneo",
-        "hint": { "en": "The name of the alarm that will be used to generate alarms names in the Homey application when synchronizing the alarm clock itself and the application." }
+        "hint": { "en": "The name of the alarm that will be used to generate alarms names in the Homey application when synchronizing the alarm clock itself and the application." },
+        "highlight": true
       }
     ]
   },

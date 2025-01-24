@@ -2,30 +2,40 @@
 
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import https from 'https';
+import Bottleneck from 'bottleneck';
 import LocalLogger from '../core/LocalLogger';
 
 export interface ApiClientConfig {
     baseURL: string;
     log: LocalLogger;
     timeout?: number;
-    retryCount?: number;
     headers?: Record<string, string>;
     httpsAgent?: https.Agent;
+    limiter?: {
+        maxConcurrent: number;
+        minTime: number;
+    }
 }
 
 export abstract class ApiClient {
 
-    private readonly defaultTimeout = 10000;
-
     private readonly log: LocalLogger;
+    private readonly limiter?: Bottleneck;
     private readonly axiosInstance: AxiosInstance;
 
     protected constructor(config: ApiClientConfig) {
       this.log = config.log;
 
+      if (config.limiter !== undefined) {
+        this.limiter = new Bottleneck({
+          maxConcurrent: config.limiter.maxConcurrent,
+          minTime: config.limiter.minTime,
+        });
+      }
+
       this.axiosInstance = axios.create({
         baseURL: config.baseURL,
-        timeout: config.timeout ?? this.defaultTimeout,
+        timeout: config.timeout ?? 10000,
         headers: {
           'Content-Type': 'application/json',
           'Content-Encoding': 'gzip',
@@ -39,6 +49,10 @@ export abstract class ApiClient {
 
     protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
       try {
+        if (this.limiter !== undefined) {
+          return (await this.limiter.schedule(() => this.axiosInstance.get(url, config))).data;
+        }
+
         return (await this.axiosInstance.get(url, config)).data;
       } catch (error: unknown) {
         return this.handleError(error);
@@ -47,6 +61,10 @@ export abstract class ApiClient {
 
     protected async put<T, R>(url: string, data: T, config?: AxiosRequestConfig): Promise<R> {
       try {
+        if (this.limiter !== undefined) {
+          return (await this.limiter.schedule(() => this.axiosInstance.put(url, data, config))).data;
+        }
+
         return (await this.axiosInstance.put(url, data, config)).data;
       } catch (error: unknown) {
         return this.handleError(error);

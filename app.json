@@ -296,6 +296,106 @@
             "filter": "driver_id=somneo"
           }
         ]
+      },
+      {
+        "id": "onoff.alarm_sunrise_true",
+        "title": {
+          "en": "Alarm clock sunrise is on"
+        },
+        "hint": {
+          "en": "The status of the alarm clock sunrise from device is updated every [functions_polling_frequency] seconds."
+        },
+        "tokens": [
+          {
+            "name": "alarmclock_state.sunrise",
+            "type": "boolean",
+            "title": {
+              "en": "alarm-clock-sunrise"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.alarm_sunrise_false",
+        "title": {
+          "en": "Alarm clock sunrise is off"
+        },
+        "hint": {
+          "en": "The status of the alarm clock sunrise from device is updated every [functions_polling_frequency] seconds."
+        },
+        "tokens": [
+          {
+            "name": "alarmclock_state.sunrise",
+            "type": "boolean",
+            "title": {
+              "en": "alarm-clock-sunrise"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.alarm_true",
+        "title": {
+          "en": "Alarm clock is on"
+        },
+        "hint": {
+          "en": "The status of the alarm clock from device is updated every [functions_polling_frequency] seconds."
+        },
+        "tokens": [
+          {
+            "name": "alarmclock_state.alarm",
+            "type": "boolean",
+            "title": {
+              "en": "alarm-clock"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.alarm_false",
+        "title": {
+          "en": "Alarm clock is off"
+        },
+        "hint": {
+          "en": "The status of the alarm clock from device is updated every [functions_polling_frequency] seconds."
+        },
+        "tokens": [
+          {
+            "name": "alarmclock_state.alarm",
+            "type": "boolean",
+            "title": {
+              "en": "alarm-clock"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
       }
     ],
     "conditions": [
@@ -370,6 +470,38 @@
         },
         "hint": {
           "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.alarm_sunrise_enabled",
+        "title": {
+          "en": "Alarm clock sunrise is !{{on|off}}"
+        },
+        "hint": {
+          "en": "The status of the alarm clock sunrise from device is updated every [functions_polling_frequency] seconds."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=somneo"
+          }
+        ]
+      },
+      {
+        "id": "onoff.alarm_enabled",
+        "title": {
+          "en": "Alarm clock is !{{on|off}}"
+        },
+        "hint": {
+          "en": "The status of the alarm clock from device is updated every [functions_polling_frequency] seconds."
         },
         "args": [
           {
@@ -598,23 +730,24 @@
         "measure_humidity",
         "measure_luminance",
         "measure_noise",
+        "alarmclock_state.sunrise",
+        "alarmclock_state.alarm",
         "onoff.mainlight",
         "onoff.nightlight",
         "onoff.sunset",
         "onoff.relax_breathe",
         "onoff.bedtime_tracking",
         "dim",
-        "button.polling",
-        "button.reset",
         "media_input",
+        "volume_set",
         "speaker_playing",
-        "speaker_stop",
+        "speaker_track",
+        "speaker_artist",
         "speaker_next",
         "speaker_prev",
-        "speaker_artist",
-        "speaker_album",
-        "speaker_track",
-        "volume_set"
+        "button.force_sync",
+        "button.polling",
+        "button.reset"
       ],
       "capabilitiesOptions": {
         "onoff.mainlight": {
@@ -673,10 +806,49 @@
           }
         },
         "dim": {
+          "title": {
+            "en": "Dim Level"
+          },
           "min": 1,
           "max": 25,
           "step": 1,
           "units": {
+            "en": ""
+          }
+        },
+        "media_input": {
+          "values": [
+            {
+              "id": "fmr",
+              "title": {
+                "en": "Radio"
+              }
+            },
+            {
+              "id": "aux",
+              "title": {
+                "en": "AUX"
+              }
+            }
+          ]
+        },
+        "volume_set": {
+          "title": {
+            "en": "Set Volume"
+          },
+          "min": 0,
+          "max": 25,
+          "step": 1,
+          "units": {
+            "en": ""
+          }
+        },
+        "button.force_sync": {
+          "maintenanceAction": true,
+          "title": {
+            "en": "Forcibly Synchronise Alarms"
+          },
+          "desc": {
             "en": ""
           }
         },
@@ -697,22 +869,6 @@
           "desc": {
             "en": "This option will completely reset your device to factory settings."
           }
-        },
-        "media_input": {
-          "values": [
-            {
-              "id": "fmr",
-              "title": {
-                "en": "Radio"
-              }
-            },
-            {
-              "id": "aux",
-              "title": {
-                "en": "AUX"
-              }
-            }
-          ]
         }
       },
       "platforms": [
@@ -811,31 +967,44 @@
         {
           "type": "group",
           "label": {
-            "en": "Alarms"
+            "en": "Alarm Clock"
           },
           "children": [
             {
-              "id": "alarms_device_sync",
-              "type": "checkbox",
-              "value": false,
+              "id": "label",
+              "type": "label",
               "label": {
-                "en": "Synchronize Device Alarms"
+                "en": "How to create an alarm clock?"
               },
+              "value": "Instruction",
               "hint": {
-                "en": "If enabled, the alarms set in the Homey application will be created/updated from the device alarms. \n\nImportant: Your device's alarm polling frequency setting determines the update interval of alarms in the application."
+                "en": "To create an alarm from the Homey application, use the same name specified in the 'Alarms Synchronisation Name' settings field.\n\nYou can use any name for the alarm, as long as it contains this field case-sensitive. Once the alarms are synchronized and created on the device, you can rename the alarm in the app as you wish."
               },
               "highlight": true
             },
             {
-              "id": "alarms_generative_name",
+              "id": "application_alarms_sync",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Synchronize Application Alarms"
+              },
+              "hint": {
+                "en": "If enabled, alarms set in the Homey app will be created, updated, and deleted based on the alarms in your device. This works both ways, i.e. if you create an alarm in the app it will automatically appear on the device, etc."
+              },
+              "highlight": true
+            },
+            {
+              "id": "alarms_sync_name",
               "type": "text",
               "label": {
-                "en": "Alarm Name"
+                "en": "Alarms Synchronization Name"
               },
               "value": "Philips Somneo",
               "hint": {
                 "en": "The name of the alarm that will be used to generate alarms names in the Homey application when synchronizing the alarm clock itself and the application."
-              }
+              },
+              "highlight": true
             }
           ]
         },
@@ -1161,47 +1330,18 @@
           },
           "children": [
             {
-              "id": "radio_channel",
-              "type": "dropdown",
-              "value": "1",
+              "id": "name_ch1",
+              "type": "text",
               "label": {
-                "en": "Radio Channel"
+                "en": "Radio Chanel Name"
               },
-              "values": [
-                {
-                  "id": "1",
-                  "label": {
-                    "en": "Channel 1"
-                  }
-                },
-                {
-                  "id": "2",
-                  "label": {
-                    "en": "Channel 2"
-                  }
-                },
-                {
-                  "id": "3",
-                  "label": {
-                    "en": "Channel 3"
-                  }
-                },
-                {
-                  "id": "4",
-                  "label": {
-                    "en": "Channel 4"
-                  }
-                },
-                {
-                  "id": "5",
-                  "label": {
-                    "en": "Channel 5"
-                  }
-                }
-              ]
+              "value": "Channel 1",
+              "hint": {
+                "en": "Name of radio channel #1."
+              }
             },
             {
-              "id": "radio_frequency",
+              "id": "frequency_ch1",
               "type": "number",
               "label": {
                 "en": "Radio Frequency"
@@ -1212,6 +1352,121 @@
               "step": 0.1,
               "units": {
                 "en": "FM"
+              },
+              "hint": {
+                "en": "Frequency of radio channel #1."
+              }
+            },
+            {
+              "id": "name_ch2",
+              "type": "text",
+              "label": {
+                "en": "Radio Chanel Name"
+              },
+              "value": "Channel 2",
+              "hint": {
+                "en": "Name of radio channel #2."
+              }
+            },
+            {
+              "id": "frequency_ch2",
+              "type": "number",
+              "label": {
+                "en": "Radio Frequency"
+              },
+              "value": 87.5,
+              "min": 87.5,
+              "max": 108,
+              "step": 0.1,
+              "units": {
+                "en": "FM"
+              },
+              "hint": {
+                "en": "Frequency of radio channel #2."
+              }
+            },
+            {
+              "id": "name_ch3",
+              "type": "text",
+              "label": {
+                "en": "Radio Chanel Name"
+              },
+              "value": "Channel 3",
+              "hint": {
+                "en": "Name of radio channel #3."
+              }
+            },
+            {
+              "id": "frequency_ch3",
+              "type": "number",
+              "label": {
+                "en": "Radio Frequency"
+              },
+              "value": 87.5,
+              "min": 87.5,
+              "max": 108,
+              "step": 0.1,
+              "units": {
+                "en": "FM"
+              },
+              "hint": {
+                "en": "Frequency of radio channel #3."
+              }
+            },
+            {
+              "id": "name_ch4",
+              "type": "text",
+              "label": {
+                "en": "Radio Chanel Name"
+              },
+              "value": "Channel 4",
+              "hint": {
+                "en": "Name of radio channel #4."
+              }
+            },
+            {
+              "id": "frequency_ch4",
+              "type": "number",
+              "label": {
+                "en": "Radio Frequency"
+              },
+              "value": 87.5,
+              "min": 87.5,
+              "max": 108,
+              "step": 0.1,
+              "units": {
+                "en": "FM"
+              },
+              "hint": {
+                "en": "Frequency of radio channel #4."
+              }
+            },
+            {
+              "id": "name_ch5",
+              "type": "text",
+              "label": {
+                "en": "Radio Chanel Name"
+              },
+              "value": "Channel 5",
+              "hint": {
+                "en": "Name of radio channel #5."
+              }
+            },
+            {
+              "id": "frequency_ch5",
+              "type": "number",
+              "label": {
+                "en": "Radio Frequency"
+              },
+              "value": 87.5,
+              "min": 87.5,
+              "max": 108,
+              "step": 0.1,
+              "units": {
+                "en": "FM"
+              },
+              "hint": {
+                "en": "Frequency of radio channel #5."
               }
             }
           ]
@@ -1220,6 +1475,15 @@
     }
   ],
   "capabilities": {
+    "alarmclock_state": {
+      "type": "boolean",
+      "title": {
+        "en": "Alarm Clock State"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": null
+    },
     "onoff_alarmclock": {
       "type": "boolean",
       "insights": true,

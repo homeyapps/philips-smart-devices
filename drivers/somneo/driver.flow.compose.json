@@ -139,6 +139,62 @@
           "title": { "en": "bedtime-tracking" }
         }
       ]
+    },
+    {
+      "id": "onoff.alarm_sunrise_true",
+      "title": { "en": "Alarm clock sunrise is on" },
+      "hint": {
+        "en": "The status of the alarm clock sunrise from device is updated every [functions_polling_frequency] seconds."
+      },
+      "tokens": [
+        {
+          "name": "alarmclock_state.sunrise",
+          "type": "boolean",
+          "title": { "en": "alarm-clock-sunrise" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.alarm_sunrise_false",
+      "title": { "en": "Alarm clock sunrise is off" },
+      "hint": {
+        "en": "The status of the alarm clock sunrise from device is updated every [functions_polling_frequency] seconds."
+      },
+      "tokens": [
+        {
+          "name": "alarmclock_state.sunrise",
+          "type": "boolean",
+          "title": { "en": "alarm-clock-sunrise" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.alarm_true",
+      "title": { "en": "Alarm clock is on" },
+      "hint": {
+        "en": "The status of the alarm clock from device is updated every [functions_polling_frequency] seconds."
+      },
+      "tokens": [
+        {
+          "name": "alarmclock_state.alarm",
+          "type": "boolean",
+          "title": { "en": "alarm-clock" }
+        }
+      ]
+    },
+    {
+      "id": "onoff.alarm_false",
+      "title": { "en": "Alarm clock is off" },
+      "hint": {
+        "en": "The status of the alarm clock from device is updated every [functions_polling_frequency] seconds."
+      },
+      "tokens": [
+        {
+          "name": "alarmclock_state.alarm",
+          "type": "boolean",
+          "title": { "en": "alarm-clock" }
+        }
+      ]
     }
   ],
   "conditions": [
@@ -185,6 +241,24 @@
       },
       "hint": {
         "en": "The status of the bedtime tracking from device is updated every [functions_polling_frequency] seconds."
+      }
+    },
+    {
+      "id": "onoff.alarm_sunrise_enabled",
+      "title": {
+        "en": "Alarm clock sunrise is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the alarm clock sunrise from device is updated every [functions_polling_frequency] seconds."
+      }
+    },
+    {
+      "id": "onoff.alarm_enabled",
+      "title": {
+        "en": "Alarm clock is !{{on|off}}"
+      },
+      "hint": {
+        "en": "The status of the alarm clock from device is updated every [functions_polling_frequency] seconds."
       }
     }
   ],
