@@ -53,6 +53,14 @@ export interface SomneoAlarm {
   almmn: number; // The alarm's minutes
   daynm?: number; // The alarm's repetition
   pwrsz?: number; // Whether the PowerWake activated or deactivated
+  pszhr?: number; // The PowerWake hour
+  pszmn?: number; // The PowerWake minute
+  ctype?: number; // The type of sunrise
+  curve?: number; // The light level of the sunrise
+  durat?: number; // The duration of the sunrise in minutes
+  snddv?: string; // The type of sound device used for the sunset sound ['off', 'dus', 'fmr', 'aux']
+  sndch?: string; // The channel or preset that is selected for the sunrise sound
+  sndlv?: number; // The sunrise sound's volume level
 }
 
 export interface SomneoAlarms {
@@ -72,7 +80,7 @@ export interface SomneoEvent {
   ltlvl: number; // The level of the main light
 }
 
-export interface PlayerSettings {
+export interface SomneoPlayerSettings {
   onoff?: boolean, // Whether the player is enabled or not
   sdvol?: number, // The sound level of the player
   tempy?: boolean, // Whether the sound preview is enabled or not
@@ -80,7 +88,7 @@ export interface PlayerSettings {
   sndch?: string // FM radio channel
 }
 
-export interface RadioChannelsFrequencies {
+export interface SomneoRadioChannelsFrequencies {
   1?: string
   2?: string
   3?: string
@@ -88,10 +96,22 @@ export interface RadioChannelsFrequencies {
   5?: string
 }
 
-export interface AlarmClock {
+export interface HomeyAlarmClock {
   id: number;
   enabled?: boolean;
   powerWakeEnabled?: boolean;
   time: string;
   repetition?: object;
+}
+
+export interface AlarmSettings {
+  sunTheme: number,
+  duration: number,
+  lightIntensity: number,
+  volume: number,
+  sound: string,
+  soundChannel: string,
+  powerWake: boolean,
+  powerWakeTime: number,
+  snoozeDuration?: number
 }

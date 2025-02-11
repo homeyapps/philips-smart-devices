@@ -242,7 +242,7 @@
   {
     "type": "group",
     "label": { "en": "Relax Breathe" },
-    "hint": { "en": "Light-guided wind-down function is designed to help you sleep by decompressing from the day's activities \nFollow one of seven rhythms of light or sound with your breathing as instructed in the video. \nRecommend to start with a rhythm of 6-8 breaths per minute. \nn the unlikely case of feeling unwell while performing RelaxBreathe please stop RelaxBreathe immediately." },
+    "hint": { "en": "Light-guided wind-down function is designed to help you sleep by decompressing from the day's activities \nFollow one of seven rhythms of light or sound with your breathing. \nRecommend to start with a rhythm of 6-8 breaths per minute. \nIn the unlikely case of feeling unwell while performing RelaxBreathe please stop RelaxBreathe immediately." },
     "children": [
       {
         "id": "relax_breathing_pace",

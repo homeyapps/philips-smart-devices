@@ -6,7 +6,7 @@ import LocalLogger from '../../src/core/LocalLogger';
 import SomneoClient from '../../src/api/SomneoClient';
 import { HomeyAPITypes } from '../../types';
 import Alarm = HomeyAPIV2.ManagerAlarms.Alarm;
-import { AlarmClock } from '../../src/api/SomneoDomains';
+import { HomeyAlarmClock } from '../../src/api/SomneoDomains';
 
 interface HomeyAlarmData {
   capabilityID: string;
@@ -213,7 +213,11 @@ module.exports = class SomneoDevice extends Homey.Device {
   }
 
   private async syncSomneoAlarms() {
-    const somneoAlarms = await this.somneoClient!.getAlarms();
+    const somneoAlarms = await this.somneoClient!.getAlarms().catch((err) => {
+      this.log(err);
+      return [];
+    });
+
     if (!somneoAlarms.length) {
       return;
     }
@@ -296,7 +300,7 @@ module.exports = class SomneoDevice extends Homey.Device {
     this.log('Somneo alarms synchronised');
   }
 
-  private async createHomeyAlarm(homeyAlarmData: HomeyAlarmData, somneoAlarm: AlarmClock) {
+  private async createHomeyAlarm(homeyAlarmData: HomeyAlarmData, somneoAlarm: HomeyAlarmClock) {
     const alarmName = `${this.getSetting('alarms_sync_name')} #${somneoAlarm.id}`;
     const homeyAlarm = (<Alarm> await this.homeyClient!.alarms.createAlarm({
       alarm: {
@@ -603,6 +607,46 @@ module.exports = class SomneoDevice extends Homey.Device {
     });
     this.homey.flow.getActionCard('onoff.aod_activate').registerRunListener(async (args, state) => {
       await this.somneoClient?.toggleAlwaysOnDisplay(args.state === 'true').catch(this.error);
+    });
+
+    this.homey.flow.getActionCard('create_alarm').registerRunListener(async (args, state) => {
+      let cs = args.color_scheme;
+      let li = args.light_intensity;
+
+      if (cs === undefined) {
+        cs = 0;
+      } else if (args.color_scheme.ctype === 0) {
+        li = args.color_scheme.curve;
+      }
+
+      return {
+        device_alarm_id: (await this.somneoClient?.setAlarm({
+          id: -1,
+          time: args.alarm_time,
+          repetition: {
+            monday: args.mon,
+            tuesday: args.tue,
+            wednesday: args.wed,
+            thursday: args.thu,
+            friday: args.fri,
+            saturday: args.sat,
+            sunday: args.sun,
+          },
+        }, true, {
+          sunTheme: cs,
+          duration: args.sunrise_duration === undefined ? 0 : args.sunrise_duration,
+          lightIntensity: li === undefined ? 0 : li,
+          volume: args.volume === undefined ? 0 : args.volume,
+          sound: args.ambient_sound_source === undefined ? 'wus' : args.ambient_sound_source,
+          soundChannel: args.ambient_sound === undefined ? '1' : args.ambient_sound.sndch,
+          powerWake: args.power_wake === undefined ? false : args.power_wake,
+          powerWakeTime: args.power_wake_time === undefined ? 0 : args.power_wake_time,
+          snoozeDuration: args.snooze_duration,
+        }))?.prfnr,
+      };
+    });
+    this.homey.flow.getActionCard('remove_alarm').registerRunListener(async (args, state) => {
+      return { removed_device_alarm_id: (await this.somneoClient?.deleteAlarm(args.device_alarm_id))?.prfnr };
     });
   }
 

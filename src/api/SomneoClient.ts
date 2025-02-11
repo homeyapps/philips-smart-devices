@@ -4,7 +4,7 @@ import https from 'https';
 import { ApiClient } from './ApiClient';
 import LocalLogger from '../core/LocalLogger';
 import {
-  AlarmClock, PlayerSettings, RadioChannelsFrequencies, SomneoAlarm,
+  HomeyAlarmClock, SomneoPlayerSettings, SomneoRadioChannelsFrequencies, SomneoAlarm,
   SomneoAlarms,
   SomneoAlarmSchedules,
   SomneoBedtimeTrackingSettings, SomneoEvent,
@@ -12,7 +12,7 @@ import {
   SomneoRelaxBreatheSettings,
   SomneoSensorsData,
   SomneoStatusesData,
-  SomneoSunsetSettings,
+  SomneoSunsetSettings, AlarmSettings,
 } from './SomneoDomains';
 
 export default class SomneoClient extends ApiClient {
@@ -52,6 +52,7 @@ export default class SomneoClient extends ApiClient {
       {
         baseURL: `https://${host}/di/v1/products/1`,
         log,
+        timeout: 30000,
         headers: { Connection: 'keep-alive' },
         httpsAgent: new https.Agent({
           maxSockets: 1,
@@ -60,7 +61,7 @@ export default class SomneoClient extends ApiClient {
         }),
         limiter: {
           maxConcurrent: 1,
-          minTime: 1000,
+          minTime: 1100,
         },
       },
     );
@@ -147,7 +148,7 @@ export default class SomneoClient extends ApiClient {
     return this.put<unknown, SomneoBedtimeTrackingSettings>('/wungt', { night: enabled });
   }
 
-  public async getAlarms(): Promise<AlarmClock[]> {
+  public async getAlarms(): Promise<HomeyAlarmClock[]> {
     const alarms = await this.get<SomneoAlarms>('/wualm/aenvs');
     const times = await this.get<SomneoAlarmSchedules>('/wualm/aalms');
 
@@ -160,12 +161,40 @@ export default class SomneoClient extends ApiClient {
     })).filter((_, index) => alarms.prfvs[index]);
   }
 
-  public async setAlarm(alarm: AlarmClock, enabled: boolean = false): Promise<SomneoAlarm> {
+  public async setAlarm(alarm: HomeyAlarmClock, enabled: boolean = false, alarmSettings?: AlarmSettings): Promise<SomneoAlarm> {
     const [hour, minute] = alarm.time.split(':').map(Number);
     const alarmID = (await this.get<SomneoAlarms>('/wualm/aenvs')).prfvs.findIndex((enabled) => !enabled) + 1;
 
     if (alarmID === -1) {
       throw new Error('No available alarm slots');
+    }
+
+    if (alarmSettings !== undefined) {
+      const powerWakeTime = new Date();
+      powerWakeTime.setHours(hour);
+      powerWakeTime.setMinutes(minute + alarmSettings.powerWakeTime);
+
+      if (alarmSettings.snoozeDuration !== undefined) {
+        await this.put<unknown, unknown>('/wualm', { snztm: alarmSettings.snoozeDuration });
+      }
+
+      return this.put<SomneoAlarm, SomneoAlarm>('/wualm/prfwu', {
+        prfnr: alarmID,
+        prfen: enabled,
+        prfvs: true,
+        almhr: hour,
+        almmn: minute,
+        daynm: this.alarmDaysToDaysInt(alarm.repetition as Record<string, boolean>),
+        pwrsz: alarmSettings.powerWake ? 255 : 0,
+        pszhr: powerWakeTime.getHours(),
+        pszmn: powerWakeTime.getMinutes(),
+        ctype: alarmSettings.sunTheme,
+        curve: alarmSettings.lightIntensity,
+        durat: alarmSettings.duration,
+        snddv: alarmSettings.sound,
+        sndch: alarmSettings.soundChannel,
+        sndlv: alarmSettings.volume,
+      });
     }
 
     return this.put<SomneoAlarm, SomneoAlarm>('/wualm/prfwu', {
@@ -190,28 +219,28 @@ export default class SomneoClient extends ApiClient {
     return this.get<SomneoEvent>('/dataupload/event.1/data');
   }
 
-  public togglePlayer(enabled: boolean): Promise<PlayerSettings> {
-    return this.put<unknown, PlayerSettings>('/wuply', { onoff: enabled });
+  public togglePlayer(enabled: boolean): Promise<SomneoPlayerSettings> {
+    return this.put<unknown, SomneoPlayerSettings>('/wuply', { onoff: enabled });
   }
 
-  public changePlayerSource(source: string): Promise<PlayerSettings> {
-    return this.put<unknown, PlayerSettings>('/wuply', { snddv: source });
+  public changePlayerSource(source: string): Promise<SomneoPlayerSettings> {
+    return this.put<unknown, SomneoPlayerSettings>('/wuply', { snddv: source });
   }
 
-  public changePlayerVolume(volume: number): Promise<PlayerSettings> {
-    return this.put<unknown, PlayerSettings>('/wuply', { sdvol: volume });
+  public changePlayerVolume(volume: number): Promise<SomneoPlayerSettings> {
+    return this.put<unknown, SomneoPlayerSettings>('/wuply', { sdvol: volume });
   }
 
-  public getRadioChannelsFrequencies(): Promise<RadioChannelsFrequencies> {
-    return this.get<RadioChannelsFrequencies>('/wufmp/00');
+  public getRadioChannelsFrequencies(): Promise<SomneoRadioChannelsFrequencies> {
+    return this.get<SomneoRadioChannelsFrequencies>('/wufmp/00');
   }
 
-  public changeRadioChannelsFrequencies(channels: RadioChannelsFrequencies): Promise<RadioChannelsFrequencies> {
-    return this.put<RadioChannelsFrequencies, RadioChannelsFrequencies>('/wufmp/00', channels);
+  public changeRadioChannelsFrequencies(channels: SomneoRadioChannelsFrequencies): Promise<SomneoRadioChannelsFrequencies> {
+    return this.put<SomneoRadioChannelsFrequencies, SomneoRadioChannelsFrequencies>('/wufmp/00', channels);
   }
 
-  public changeRadioChannel(channel: string): Promise<PlayerSettings> {
-    return this.put<unknown, PlayerSettings>('/wuply', { sndch: channel });
+  public changeRadioChannel(channel: string): Promise<SomneoPlayerSettings> {
+    return this.put<unknown, SomneoPlayerSettings>('/wuply', { sndch: channel });
   }
 
   private daysIntToAlarmDays(daysInt: number): Record<string, boolean> {

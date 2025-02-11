@@ -376,6 +376,180 @@
           ]
         }
       ]
+    },
+    {
+      "id": "create_alarm",
+      "title": {
+        "en": "Create alarm"
+      },
+      "titleFormatted": {
+        "en": "Create an alarm clock for [[alarm_time]], repeat on ([[mon]], [[tue]], [[wed]], [[thu]], [[fri]], [[sat]], [[sun]]) with [[snooze_duration]] snooze and next optional parameters: \n\nDuration: [[sunrise_duration]],\nIntensity: [[light_intensity]],\nColor Scheme: [[color_scheme]],\nVolume: [[volume]],\nSound Source: [[ambient_sound_source]],\nSound: [[ambient_sound]],\nPowerWake ⏰: [[power_wake]],\nPowerWake Start Time: [[power_wake_time]]"
+      },
+      "hint": {
+        "en": "Snooze duration applies to all alarms.\n\nPowerWake is an an extra alarm making sure you get out of bed. It wake you up with a loud sound and bright flashing light. PowerWake start time is how long after your normal alarm do you want to start PowerWake."
+      },
+      "args": [
+        {
+          "type": "time",
+          "name": "alarm_time",
+          "title": { "en": "Time" },
+          "placeholder": { "en": "00:00" }
+        },
+        {
+          "type": "checkbox",
+          "name": "mon",
+          "title": { "en": "Mon" }
+        },
+        {
+          "type": "checkbox",
+          "name": "tue",
+          "title": { "en": "Tue" }
+        },
+        {
+          "type": "checkbox",
+          "name": "wed",
+          "title": { "en": "Wed" }
+        },
+        {
+          "type": "checkbox",
+          "name": "thu",
+          "title": { "en": "Thu" }
+        },
+        {
+          "type": "checkbox",
+          "name": "fri",
+          "title": { "en": "Fri" }
+        },
+        {
+          "type": "checkbox",
+          "name": "sat",
+          "title": { "en": "Sat" }
+        },
+        {
+          "type": "checkbox",
+          "name": "sun",
+          "title": { "en": "Sun" }
+        },
+        {
+          "type": "range",
+          "name": "snooze_duration",
+          "title": { "en": "Duration" },
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "label": "min",
+          "labelDecimals": 0
+        },
+        {
+          "type": "range",
+          "name": "sunrise_duration",
+          "required": false,
+          "title": { "en": "Sunrise Duration" },
+          "min": 5,
+          "max": 40,
+          "step": 5,
+          "label": "min",
+          "labelDecimals": 0
+        },
+        {
+          "type": "range",
+          "name": "light_intensity",
+          "required": false,
+          "title": { "en": "Light Intensity" },
+          "min": 1,
+          "max": 25,
+          "step": 1,
+          "labelDecimals": 0
+        },
+        {
+          "type": "autocomplete",
+          "name": "color_scheme",
+          "required": false,
+          "title": { "en": "Color Scheme" },
+          "placeholder": { "en": "Scheme" }
+        },
+        {
+          "type": "range",
+          "name": "volume",
+          "required": false,
+          "title": { "en": "Volume" },
+          "min": 1,
+          "max": 25,
+          "step": 1,
+          "labelDecimals": 0
+        },
+        {
+          "type": "dropdown",
+          "name": "ambient_sound_source",
+          "required": false,
+          "title": { "en": "Ambient Sound Source" },
+          "values": [
+            { "id": "fmr", "title": { "en": "FM Radio" } },
+            { "id": "wus", "title": { "en": "Wake Up Sound" } },
+            { "id": "off", "title": { "en": "No Sound" } }
+          ]
+        },
+        {
+          "type": "autocomplete",
+          "name": "ambient_sound",
+          "required": false,
+          "title": { "en": "Ambient Sounds" },
+          "placeholder": { "en": "Sound" }
+        },
+        {
+          "type": "checkbox",
+          "name": "power_wake",
+          "required": false,
+          "title": { "en": "Use PowerWake" }
+        },
+        {
+          "type": "range",
+          "name": "power_wake_time",
+          "required": false,
+          "title": { "en": "PowerWake Start Time" },
+          "min": 0,
+          "max": 59,
+          "step": 1,
+          "label": "min",
+          "labelDecimals": 0
+        }
+      ],
+      "tokens": [
+        {
+          "name": "device_alarm_id",
+          "type": "number",
+          "title": { "en": "Device Alarm ID" },
+          "example": 5
+        }
+      ]
+    },
+    {
+      "id": "remove_alarm",
+      "title": {
+        "en": "Remove alarm"
+      },
+      "titleFormatted": {
+        "en": "Remove an alarm clock with [[device_alarm_id]]"
+      },
+      "args": [
+        {
+          "type": "number",
+          "name": "device_alarm_id",
+          "title": { "en": "ID" },
+          "placeholder": { "en": "Device Alarm ID" },
+          "min": 1,
+          "max": 16,
+          "step": 1
+        }
+      ],
+      "tokens": [
+        {
+          "name": "removed_device_alarm_id",
+          "type": "number",
+          "title": { "en": "Removed Device Alarm ID" },
+          "example": 5
+        }
+      ]
     }
   ]
 }
