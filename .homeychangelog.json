@@ -22,5 +22,8 @@
   },
   "1.5.0": {
     "en": "Added new features: radio/aux player, alarm clock capabilities, climate, alarms double-side HomeyApp <-> Somneo synchronization, new maintenance actions, new alarms flows and new advanced settings. Updated: Somneo API and general app performance."
+  },
+  "1.6.0": {
+    "en": " Added new features: new alarms creation and removing flows"
   }
 }
