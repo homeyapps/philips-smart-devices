@@ -2,6 +2,7 @@
 
 import Homey, { DiscoveryResultMDNSSD } from 'homey';
 import { HomeyAPI, HomeyAPIV2 } from 'homey-api';
+import { DateTime } from 'luxon';
 import LocalLogger from '../../src/core/LocalLogger';
 import SomneoClient from '../../src/api/SomneoClient';
 import { HomeyAPITypes } from '../../types';
@@ -610,44 +611,52 @@ module.exports = class SomneoDevice extends Homey.Device {
     });
 
     this.homey.flow.getActionCard('create_alarm').registerRunListener(async (args, state) => {
-      let cs = args.color_scheme;
-      let li = args.light_intensity;
-
-      if (cs === undefined) {
-        cs = 0;
-      } else if (args.color_scheme.ctype === 0) {
-        li = args.color_scheme.curve;
-      }
-
-      return {
-        device_alarm_id: (await this.somneoClient?.setAlarm({
-          id: -1,
-          time: args.alarm_time,
-          repetition: {
-            monday: args.mon,
-            tuesday: args.tue,
-            wednesday: args.wed,
-            thursday: args.thu,
-            friday: args.fri,
-            saturday: args.sat,
-            sunday: args.sun,
-          },
-        }, true, {
-          sunTheme: cs,
-          duration: args.sunrise_duration === undefined ? 0 : args.sunrise_duration,
-          lightIntensity: li === undefined ? 0 : li,
-          volume: args.volume === undefined ? 0 : args.volume,
-          sound: args.ambient_sound_source === undefined ? 'wus' : args.ambient_sound_source,
-          soundChannel: args.ambient_sound === undefined ? '1' : args.ambient_sound.sndch,
-          powerWake: args.power_wake === undefined ? false : args.power_wake,
-          powerWakeTime: args.power_wake_time === undefined ? 0 : args.power_wake_time,
-          snoozeDuration: args.snooze_duration,
-        }))?.prfnr,
-      };
+      return this.createAlarm(args);
+    });
+    this.homey.flow.getActionCard('create_now_alarm').registerRunListener(async (args, state) => {
+      const delayTime = DateTime.now().setZone(this.homey.clock.getTimezone()).plus({ minutes: args.alarm_time });
+      return this.createAlarm(args, `${delayTime.hour}:${delayTime.minute}`);
     });
     this.homey.flow.getActionCard('remove_alarm').registerRunListener(async (args, state) => {
       return { removed_device_alarm_id: (await this.somneoClient?.deleteAlarm(args.device_alarm_id))?.prfnr };
     });
+  }
+
+  private async createAlarm(args: any, time?: string) {
+    let cs = args.color_scheme.ctype;
+    let li = args.light_intensity;
+
+    if (cs === undefined) {
+      cs = 0;
+    } else if (args.color_scheme.ctype === 0) {
+      li = args.color_scheme.curve;
+    }
+
+    return {
+      device_alarm_id: (await this.somneoClient?.setAlarm({
+        id: -1,
+        time: time === undefined ? args.alarm_time : time,
+        repetition: {
+          monday: args.mon,
+          tuesday: args.tue,
+          wednesday: args.wed,
+          thursday: args.thu,
+          friday: args.fri,
+          saturday: args.sat,
+          sunday: args.sun,
+        },
+      }, true, {
+        sunTheme: Number(cs),
+        duration: args.sunrise_duration === undefined ? 0 : args.sunrise_duration,
+        lightIntensity: li === undefined ? 0 : Number(li),
+        volume: args.volume === undefined ? 0 : args.volume,
+        sound: args.ambient_sound_source === undefined ? 'wus' : args.ambient_sound_source,
+        soundChannel: args.ambient_sound === undefined ? '1' : args.ambient_sound.sndch,
+        powerWake: args.power_wake === undefined ? false : args.power_wake,
+        powerWakeTime: args.power_wake_time === undefined ? 0 : args.power_wake_time,
+        snoozeDuration: args.snooze_duration,
+      }))?.prfnr,
+    };
   }
 
 };
