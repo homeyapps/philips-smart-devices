@@ -25,5 +25,8 @@
   },
   "1.6.0": {
     "en": " Added new features: new alarms creation and removing flows"
+  },
+  "1.6.1": {
+    "en": "Updated features: added create alarm flow variation"
   }
 }
