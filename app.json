@@ -1179,7 +1179,7 @@
   "drivers": [
     {
       "name": {
-        "en": "Somneo Sleep & Wake-up Light"
+        "en": "Somneo"
       },
       "class": "sensor",
       "capabilities": [
@@ -1929,8 +1929,84 @@
           ]
         }
       ]
+    },
+    {
+      "name": {
+        "en": "Smart TV"
+      },
+      "class": "tv",
+      "capabilities": [
+        "channel_down",
+        "channel_up"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "discovery": "joint-space-ssdp",
+      "images": {
+        "small": "/drivers/tv/assets/images/small.png",
+        "large": "/drivers/tv/assets/images/large.png",
+        "xlarge": "/drivers/tv/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "options": {
+            "singular": true
+          },
+          "navigation": {
+            "next": "pincode"
+          }
+        },
+        {
+          "id": "pincode",
+          "template": "pincode",
+          "options": {
+            "title": "Login with your account",
+            "hint": "Enter the device's pincode",
+            "type": "number",
+            "length": 4
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "tv"
     }
   ],
+  "widgets": {
+    "somneo": {
+      "name": {
+        "en": "Somneo"
+      },
+      "settings": [],
+      "api": {
+        "getSomething": {
+          "method": "GET",
+          "path": "/"
+        },
+        "addSomething": {
+          "method": "POST",
+          "path": "/"
+        },
+        "updateSomething": {
+          "method": "PUT",
+          "path": "/:id"
+        },
+        "deleteSomething": {
+          "method": "DELETE",
+          "path": "/:id"
+        }
+      },
+      "id": "somneo"
+    }
+  },
   "capabilities": {
     "alarmclock_state": {
       "type": "boolean",
@@ -1960,6 +2036,24 @@
     }
   },
   "discovery": {
+    "joint-space-ssdp": {
+      "type": "ssdp",
+      "ssdp": {
+        "search": "urn:schemas-upnp-org:service:RenderingControl:1"
+      },
+      "id": "{{headers.usn}}",
+      "conditions": [
+        [
+          {
+            "field": "headers.x-user-agent",
+            "match": {
+              "type": "string",
+              "value": "redsonic"
+            }
+          }
+        ]
+      ]
+    },
     "somneo-ssdp": {
       "type": "ssdp",
       "ssdp": {

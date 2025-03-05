@@ -59,6 +59,18 @@ export abstract class ApiClient {
       }
     }
 
+    protected async post<T, R>(url: string, data: T, config?: AxiosRequestConfig): Promise<R> {
+      try {
+        if (this.limiter !== undefined) {
+          return (await this.limiter.schedule(() => this.axiosInstance.post(url, data, config))).data;
+        }
+
+        return (await this.axiosInstance.post(url, data, config)).data;
+      } catch (error: unknown) {
+        return this.handleError(error);
+      }
+    }
+
     protected async put<T, R>(url: string, data: T, config?: AxiosRequestConfig): Promise<R> {
       try {
         if (this.limiter !== undefined) {

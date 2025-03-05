@@ -4,10 +4,10 @@ import Homey, { DiscoveryResultMDNSSD } from 'homey';
 import { HomeyAPI, HomeyAPIV2 } from 'homey-api';
 import { DateTime } from 'luxon';
 import LocalLogger from '../../src/core/LocalLogger';
-import SomneoClient from '../../src/api/SomneoClient';
+import SomneoClient from '../../src/api/somneo/SomneoClient';
 import { HomeyAPITypes } from '../../types';
 import Alarm = HomeyAPIV2.ManagerAlarms.Alarm;
-import { HomeyAlarmClock } from '../../src/api/SomneoDomains';
+import { HomeyAlarmClock } from '../../src/api/somneo/SomneoDomains';
 
 interface HomeyAlarmData {
   capabilityID: string;
@@ -632,7 +632,7 @@ module.exports = class SomneoDevice extends Homey.Device {
       li = args.color_scheme.curve;
     }
 
-    return {
+    const flowTag = {
       device_alarm_id: (await this.somneoClient?.setAlarm({
         id: -1,
         time: time === undefined ? args.alarm_time : time,
@@ -657,6 +657,9 @@ module.exports = class SomneoDevice extends Homey.Device {
         snoozeDuration: args.snooze_duration,
       }))?.prfnr,
     };
+
+    await this.syncAlarms();
+    return flowTag;
   }
 
 };

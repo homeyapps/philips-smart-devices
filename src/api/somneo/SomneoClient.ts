@@ -1,8 +1,8 @@
 'use strict';
 
 import https from 'https';
-import { ApiClient } from './ApiClient';
-import LocalLogger from '../core/LocalLogger';
+import { ApiClient } from '../ApiClient';
+import LocalLogger from '../../core/LocalLogger';
 import {
   HomeyAlarmClock, SomneoPlayerSettings, SomneoRadioChannelsFrequencies, SomneoAlarm,
   SomneoAlarms,

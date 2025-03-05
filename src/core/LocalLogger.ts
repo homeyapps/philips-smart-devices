@@ -4,22 +4,22 @@ import Homey from 'homey';
 
 export default class LocalLogger {
 
-  private device: Homey.Device;
+  private simpleClass: Homey.SimpleClass;
 
-  constructor(device: Homey.Device) {
-    this.device = device;
+  constructor(device: Homey.SimpleClass) {
+    this.simpleClass = device;
   }
 
   log(...args: unknown[]) {
-    this.device.log(...args);
+    this.simpleClass.log(...args);
   }
 
   debug(...args: unknown[]) {
-    this.device.log(...args);
+    this.simpleClass.log(...args);
   }
 
   error(...args: unknown[]) {
-    this.device.error(...args);
+    this.simpleClass.error(...args);
   }
 
 }

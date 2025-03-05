@@ -1,0 +1,18 @@
+{
+  "type": "ssdp",
+  "ssdp": {
+    "search": "urn:schemas-upnp-org:service:RenderingControl:1"
+  },
+  "id": "{{headers.usn}}",
+  "conditions": [
+    [
+      {
+        "field": "headers.x-user-agent",
+        "match": {
+          "type": "string",
+          "value": "redsonic"
+        }
+      }
+    ]
+  ]
+}

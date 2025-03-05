@@ -1,0 +1,44 @@
+{
+  "name": {
+    "en": "Smart TV"
+  },
+  "class": "tv",
+  "capabilities": [
+    "channel_down",
+    "channel_up"
+  ],
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "discovery": "joint-space-ssdp",
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "options": { "singular": true },
+      "navigation": { "next": "pincode" }
+    },
+    {
+      "id": "pincode",
+      "template": "pincode",
+      "options": {
+        "title": "Login with your account",
+        "hint": "Enter the device's pincode",
+        "type": "number",
+        "length": 4
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}
