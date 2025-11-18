@@ -1429,6 +1429,17 @@
               "hint": {
                 "en": "Enable this if sleep tracker state changes (from the device or official app) are not being detected. When enabled, the sleep tracker state will be polled at the same interval as device functions. Note: This increases API load on the device."
               }
+            },
+            {
+              "id": "disable_event_system",
+              "type": "checkbox",
+              "value": false,
+              "label": {
+                "en": "Disable Event System"
+              },
+              "hint": {
+                "en": "Enable this if you have an older Somneo device that doesn't support the event system (this will stop HTTP 422 error logging). Newer devices should keep this disabled."
+              }
             }
           ]
         },

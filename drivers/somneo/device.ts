@@ -25,31 +25,12 @@ module.exports = class SomneoDevice extends Homey.Device {
 
   private currentRadioChannel: number = 1;
 
-  // Flow card instance variables
-  private _flowMainLightCondition?: any;
-  private _flowNightLightCondition?: any;
-  private _flowSunsetCondition?: any;
-  private _flowRelaxBreatheCondition?: any;
-  private _flowBedtimeTrackingCondition?: any;
-  private _flowAlarmSunriseCondition?: any;
-  private _flowAlarmCondition?: any;
-  private _flowMainLightAction?: any;
-  private _flowNightLightAction?: any;
-  private _flowSunsetAction?: any;
-  private _flowRelaxBreatheAction?: any;
-  private _flowBedtimeTrackingAction?: any;
-  private _flowAodAction?: any;
-  private _flowCreateAlarm?: any;
-  private _flowCreateNowAlarm?: any;
-  private _flowRemoveAlarm?: any;
-
   async onAdded() {
     this.log('Somneo device has been added');
   }
 
   async onInit() {
     this.registerFunctionsListeners();
-    this.registerRunListeners();
 
     this.functionsUpdateInterval = this.homey.setInterval(() => this.syncDeviceFunctions(), this.getSetting('functions_polling_frequency') * 1000);
     this.alarmsUpdateInterval = this.homey.setInterval(() => this.syncAlarms(), this.getSetting('alarms_polling_frequency') * 60000);
@@ -181,35 +162,38 @@ module.exports = class SomneoDevice extends Homey.Device {
         }
       }
 
-      try {
-        const lastEvent = await this.somneoClient.getLastEvent();
-        const eventsSpecification: Record<string, Array<[string, boolean]>> = {
-          [this.somneoClient.events.wakeupOn]: [['alarmclock_state.sunrise', true]],
-          [this.somneoClient.events.wakeupOff]: [['alarmclock_state.sunrise', false], ['alarmclock_state.alarm', true]],
-          [this.somneoClient.events.alarmOff]: [['alarmclock_state.alarm', false]],
-          [this.somneoClient.events.mainLightOn]: [['onoff.mainlight', true]],
-          [this.somneoClient.events.mainLightOff]: [['onoff.mainlight', false]],
-          [this.somneoClient.events.nightLightOn]: [['onoff.nightlight', true]],
-          [this.somneoClient.events.nightLightOff]: [['onoff.nightlight', false]],
-          [this.somneoClient.events.sunsetOn]: [['onoff.sunset', true]],
-          [this.somneoClient.events.sunsetOff]: [['onoff.sunset', false]],
-          [this.somneoClient.events.relaxBreatheOn]: [['onoff.relax_breathe', true]],
-          [this.somneoClient.events.relaxBreatheOff]: [['onoff.relax_breathe', false]],
-          [this.somneoClient.events.bedtimeTrackingOn]: [['onoff.bedtime_tracking', true]],
-          [this.somneoClient.events.bedtimeTrackingOff]: [['onoff.bedtime_tracking', false]],
-        };
+      // Only poll event system if not disabled in settings
+      if (!this.getSetting('disable_event_system')) {
+        try {
+          const lastEvent = await this.somneoClient.getLastEvent();
+          const eventsSpecification: Record<string, Array<[string, boolean]>> = {
+            [this.somneoClient.events.wakeupOn]: [['alarmclock_state.sunrise', true]],
+            [this.somneoClient.events.wakeupOff]: [['alarmclock_state.sunrise', false], ['alarmclock_state.alarm', true]],
+            [this.somneoClient.events.alarmOff]: [['alarmclock_state.alarm', false]],
+            [this.somneoClient.events.mainLightOn]: [['onoff.mainlight', true]],
+            [this.somneoClient.events.mainLightOff]: [['onoff.mainlight', false]],
+            [this.somneoClient.events.nightLightOn]: [['onoff.nightlight', true]],
+            [this.somneoClient.events.nightLightOff]: [['onoff.nightlight', false]],
+            [this.somneoClient.events.sunsetOn]: [['onoff.sunset', true]],
+            [this.somneoClient.events.sunsetOff]: [['onoff.sunset', false]],
+            [this.somneoClient.events.relaxBreatheOn]: [['onoff.relax_breathe', true]],
+            [this.somneoClient.events.relaxBreatheOff]: [['onoff.relax_breathe', false]],
+            [this.somneoClient.events.bedtimeTrackingOn]: [['onoff.bedtime_tracking', true]],
+            [this.somneoClient.events.bedtimeTrackingOff]: [['onoff.bedtime_tracking', false]],
+          };
 
-        if (lastEvent.event in eventsSpecification) {
-          const eventCapability = eventsSpecification[lastEvent.event];
-          for (const [capability, value] of eventCapability) {
-            await this.setCapabilityValue(capability, value);
+          if (lastEvent.event in eventsSpecification) {
+            const eventCapability = eventsSpecification[lastEvent.event];
+            for (const [capability, value] of eventCapability) {
+              await this.setCapabilityValue(capability, value);
+            }
+            this.log('Last event name:', lastEvent.event);
+          } else {
+            this.log('Unnecessary event name:', lastEvent.event);
           }
-          this.log('Last event name:', lastEvent.event);
-        } else {
-          this.log('Unnecessary event name:', lastEvent.event);
+        } catch (error) {
+          this.error('Error fetching last event:', error);
         }
-      } catch (error) {
-        this.error('Error fetching last event:', error);
       }
 
       this.log('Device functions synchronised');
@@ -597,91 +581,6 @@ module.exports = class SomneoDevice extends Homey.Device {
       } catch (error) {
         this.error('Error toggling alarm:', error);
       }
-    });
-  }
-
-  private registerRunListeners() {
-    // Condition cards - store instance references
-    this._flowMainLightCondition = this.homey.flow.getConditionCard('onoff.mainlight_enabled');
-    this._flowMainLightCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('onoff.mainlight');
-    });
-
-    this._flowNightLightCondition = this.homey.flow.getConditionCard('onoff.nightlight_enabled');
-    this._flowNightLightCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('onoff.nightlight');
-    });
-
-    this._flowSunsetCondition = this.homey.flow.getConditionCard('onoff.sunset_enabled');
-    this._flowSunsetCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('onoff.sunset');
-    });
-
-    this._flowRelaxBreatheCondition = this.homey.flow.getConditionCard('onoff.relax_breathe_enabled');
-    this._flowRelaxBreatheCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('onoff.relax_breathe');
-    });
-
-    this._flowBedtimeTrackingCondition = this.homey.flow.getConditionCard('onoff.bedtime_tracking_enabled');
-    this._flowBedtimeTrackingCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('onoff.bedtime_tracking');
-    });
-
-    this._flowAlarmSunriseCondition = this.homey.flow.getConditionCard('onoff.alarm_sunrise_enabled');
-    this._flowAlarmSunriseCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('alarmclock_state.sunrise');
-    });
-
-    this._flowAlarmCondition = this.homey.flow.getConditionCard('onoff.alarm_enabled');
-    this._flowAlarmCondition.registerRunListener((args: any, state: any) => {
-      return this.getCapabilityValue('alarmclock_state.alarm');
-    });
-
-    // Action cards - store instance references
-    this._flowMainLightAction = this.homey.flow.getActionCard('onoff.mainlight_activate');
-    this._flowMainLightAction.registerRunListener(async (args: any, state: any) => {
-      await this.triggerCapabilityListener('onoff.mainlight', args.state === 'true').catch(this.error);
-    });
-
-    this._flowNightLightAction = this.homey.flow.getActionCard('onoff.nightlight_activate');
-    this._flowNightLightAction.registerRunListener(async (args: any, state: any) => {
-      await this.triggerCapabilityListener('onoff.nightlight', args.state === 'true').catch(this.error);
-    });
-
-    this._flowSunsetAction = this.homey.flow.getActionCard('onoff.sunset_activate');
-    this._flowSunsetAction.registerRunListener(async (args: any, state: any) => {
-      await this.triggerCapabilityListener('onoff.sunset', args.state === 'true').catch(this.error);
-    });
-
-    this._flowRelaxBreatheAction = this.homey.flow.getActionCard('onoff.relax_breathe_activate');
-    this._flowRelaxBreatheAction.registerRunListener(async (args: any, state: any) => {
-      await this.triggerCapabilityListener('onoff.relax_breathe', args.state === 'true').catch(this.error);
-    });
-
-    this._flowBedtimeTrackingAction = this.homey.flow.getActionCard('onoff.bedtime_tracking_activate');
-    this._flowBedtimeTrackingAction.registerRunListener(async (args: any, state: any) => {
-      await this.triggerCapabilityListener('onoff.bedtime_tracking', args.state === 'true').catch(this.error);
-    });
-
-    this._flowAodAction = this.homey.flow.getActionCard('onoff.aod_activate');
-    this._flowAodAction.registerRunListener(async (args: any, state: any) => {
-      await this.somneoClient?.toggleAlwaysOnDisplay(args.state === 'true').catch(this.error);
-    });
-
-    this._flowCreateAlarm = this.homey.flow.getActionCard('create_alarm');
-    this._flowCreateAlarm.registerRunListener(async (args: any, state: any) => {
-      return this.createAlarm(args);
-    });
-
-    this._flowCreateNowAlarm = this.homey.flow.getActionCard('create_now_alarm');
-    this._flowCreateNowAlarm.registerRunListener(async (args: any, state: any) => {
-      const delayTime = DateTime.now().setZone(this.homey.clock.getTimezone()).plus({ minutes: args.alarm_time });
-      return this.createAlarm(args, `${delayTime.hour}:${delayTime.minute}`);
-    });
-
-    this._flowRemoveAlarm = this.homey.flow.getActionCard('remove_alarm');
-    this._flowRemoveAlarm.registerRunListener(async (args: any, state: any) => {
-      return { removed_device_alarm_id: (await this.somneoClient?.deleteAlarm(args.device_alarm_id))?.prfnr };
     });
   }
 
