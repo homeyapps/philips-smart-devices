@@ -1,6 +1,6 @@
 {
   "id": "com.philips.smart-devices",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "compatibility": ">=12.2.0",
   "platforms": [
     "local"
