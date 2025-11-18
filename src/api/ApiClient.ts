@@ -38,7 +38,6 @@ export abstract class ApiClient {
         timeout: config.timeout ?? 10000,
         headers: {
           'Content-Type': 'application/json',
-          'Content-Encoding': 'gzip',
           ...config.headers,
         },
         httpsAgent: config.httpsAgent,

@@ -31,7 +31,6 @@ module.exports = class SomneoDevice extends Homey.Device {
 
   async onInit() {
     this.registerFunctionsListeners();
-    this.registerRunListeners();
 
     this.functionsUpdateInterval = this.homey.setInterval(() => this.syncDeviceFunctions(), this.getSetting('functions_polling_frequency') * 1000);
     this.alarmsUpdateInterval = this.homey.setInterval(() => this.syncAlarms(), this.getSetting('alarms_polling_frequency') * 60000);
@@ -153,31 +152,48 @@ module.exports = class SomneoDevice extends Homey.Device {
         this.setSettings({ sunrise_preview: lightSettings.onoff && lightSettings.tempy }),
       ]);
 
-      const lastEvent = await this.somneoClient.getLastEvent();
-      const eventsSpecification: Record<string, Array<[string, boolean]>> = {
-        [this.somneoClient.events.wakeupOn]: [['alarmclock_state.sunrise', true]],
-        [this.somneoClient.events.wakeupOff]: [['alarmclock_state.sunrise', false], ['alarmclock_state.alarm', true]],
-        [this.somneoClient.events.alarmOff]: [['alarmclock_state.alarm', false]],
-        [this.somneoClient.events.mainLightOn]: [['onoff.mainlight', true]],
-        [this.somneoClient.events.mainLightOff]: [['onoff.mainlight', false]],
-        [this.somneoClient.events.nightLightOn]: [['onoff.nightlight', true]],
-        [this.somneoClient.events.nightLightOff]: [['onoff.nightlight', false]],
-        [this.somneoClient.events.sunsetOn]: [['onoff.sunset', true]],
-        [this.somneoClient.events.sunsetOff]: [['onoff.sunset', false]],
-        [this.somneoClient.events.relaxBreatheOn]: [['onoff.relax_breathe', true]],
-        [this.somneoClient.events.relaxBreatheOff]: [['onoff.relax_breathe', false]],
-        [this.somneoClient.events.bedtimeTrackingOn]: [['onoff.bedtime_tracking', true]],
-        [this.somneoClient.events.bedtimeTrackingOff]: [['onoff.bedtime_tracking', false]],
-      };
-
-      if (lastEvent.event in eventsSpecification) {
-        const eventCapability = eventsSpecification[lastEvent.event];
-        for (const [capability, value] of eventCapability) {
-          await this.setCapabilityValue(capability, value);
+      // Poll bedtime tracking state if enabled in settings
+      if (this.getSetting('bedtime_tracking_polling')) {
+        try {
+          const bedtimeTracking = await this.somneoClient.getBedtimeTracking();
+          await this.setCapabilityValue('onoff.bedtime_tracking', bedtimeTracking.night);
+        } catch (error) {
+          this.error('Error polling bedtime tracking state:', error);
         }
-        this.log('Last event name:', lastEvent.event);
-      } else {
-        this.log('Unnecessary event name:', lastEvent.event);
+      }
+
+      // Only poll event system if not disabled in settings
+      if (!this.getSetting('disable_event_system')) {
+        try {
+          const lastEvent = await this.somneoClient.getLastEvent();
+          const eventsSpecification: Record<string, Array<[string, boolean]>> = {
+            [this.somneoClient.events.wakeupOn]: [['alarmclock_state.sunrise', true]],
+            [this.somneoClient.events.wakeupOff]: [['alarmclock_state.sunrise', false], ['alarmclock_state.alarm', true]],
+            [this.somneoClient.events.alarmOff]: [['alarmclock_state.alarm', false]],
+            [this.somneoClient.events.mainLightOn]: [['onoff.mainlight', true]],
+            [this.somneoClient.events.mainLightOff]: [['onoff.mainlight', false]],
+            [this.somneoClient.events.nightLightOn]: [['onoff.nightlight', true]],
+            [this.somneoClient.events.nightLightOff]: [['onoff.nightlight', false]],
+            [this.somneoClient.events.sunsetOn]: [['onoff.sunset', true]],
+            [this.somneoClient.events.sunsetOff]: [['onoff.sunset', false]],
+            [this.somneoClient.events.relaxBreatheOn]: [['onoff.relax_breathe', true]],
+            [this.somneoClient.events.relaxBreatheOff]: [['onoff.relax_breathe', false]],
+            [this.somneoClient.events.bedtimeTrackingOn]: [['onoff.bedtime_tracking', true]],
+            [this.somneoClient.events.bedtimeTrackingOff]: [['onoff.bedtime_tracking', false]],
+          };
+
+          if (lastEvent.event in eventsSpecification) {
+            const eventCapability = eventsSpecification[lastEvent.event];
+            for (const [capability, value] of eventCapability) {
+              await this.setCapabilityValue(capability, value);
+            }
+            this.log('Last event name:', lastEvent.event);
+          } else {
+            this.log('Unnecessary event name:', lastEvent.event);
+          }
+        } catch (error) {
+          this.error('Error fetching last event:', error);
+        }
       }
 
       this.log('Device functions synchronised');
@@ -565,60 +581,6 @@ module.exports = class SomneoDevice extends Homey.Device {
       } catch (error) {
         this.error('Error toggling alarm:', error);
       }
-    });
-  }
-
-  private registerRunListeners() {
-    this.homey.flow.getConditionCard('onoff.mainlight_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('onoff.mainlight');
-    });
-    this.homey.flow.getConditionCard('onoff.nightlight_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('onoff.nightlight');
-    });
-    this.homey.flow.getConditionCard('onoff.sunset_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('onoff.sunset');
-    });
-    this.homey.flow.getConditionCard('onoff.relax_breathe_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('onoff.relax_breathe');
-    });
-    this.homey.flow.getConditionCard('onoff.bedtime_tracking_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('onoff.bedtime_tracking');
-    });
-    this.homey.flow.getConditionCard('onoff.alarm_sunrise_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('alarmclock_state.sunrise');
-    });
-    this.homey.flow.getConditionCard('onoff.alarm_enabled').registerRunListener((args, state) => {
-      return this.getCapabilityValue('alarmclock_state.alarm');
-    });
-
-    this.homey.flow.getActionCard('onoff.mainlight_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.mainlight', args.state === 'true').catch(this.error);
-    });
-    this.homey.flow.getActionCard('onoff.nightlight_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.nightlight', args.state === 'true').catch(this.error);
-    });
-    this.homey.flow.getActionCard('onoff.sunset_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.sunset', args.state === 'true').catch(this.error);
-    });
-    this.homey.flow.getActionCard('onoff.relax_breathe_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.relax_breathe', args.state === 'true').catch(this.error);
-    });
-    this.homey.flow.getActionCard('onoff.bedtime_tracking_activate').registerRunListener(async (args, state) => {
-      await this.triggerCapabilityListener('onoff.bedtime_tracking', args.state === 'true').catch(this.error);
-    });
-    this.homey.flow.getActionCard('onoff.aod_activate').registerRunListener(async (args, state) => {
-      await this.somneoClient?.toggleAlwaysOnDisplay(args.state === 'true').catch(this.error);
-    });
-
-    this.homey.flow.getActionCard('create_alarm').registerRunListener(async (args, state) => {
-      return this.createAlarm(args);
-    });
-    this.homey.flow.getActionCard('create_now_alarm').registerRunListener(async (args, state) => {
-      const delayTime = DateTime.now().setZone(this.homey.clock.getTimezone()).plus({ minutes: args.alarm_time });
-      return this.createAlarm(args, `${delayTime.hour}:${delayTime.minute}`);
-    });
-    this.homey.flow.getActionCard('remove_alarm').registerRunListener(async (args, state) => {
-      return { removed_device_alarm_id: (await this.somneoClient?.deleteAlarm(args.device_alarm_id))?.prfnr };
     });
   }
 
